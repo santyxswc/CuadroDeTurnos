@@ -251,3 +251,8 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 /* Horas y recargos */
 .columnas.horas { grid-template-columns: 3fr 2fr; align-items: start; }
 .desplazable.alto { max-height: 520px; overflow-y: auto; }
+
+/* Pacientes atendidos */
+.fila.cantidad { align-items: center; flex-wrap: nowrap; }
+.fila.cantidad input { width: 80px; }
+.error-linea { color: var(--rojo); font-size: 12px; }

@@ -291,6 +291,21 @@ describe('API SGT · cuadro de turnos, tiempo real y marcaciones', () => {
       assert.ok(auditoria.cuerpo.some((e) => e.accion === 'MARCACION_CREADA_POR_COORDINADOR'));
     });
 
+    it('pacientes atendidos: solo la cantidad, del propio turno ya empezado (RF-PAC-01/02)', async () => {
+      assert.equal((await llamar('PUT', `/atenciones/${turnoBeto.id}`, { token: ana.token, cuerpo: { cantidad: 3 } })).estado, 403);
+      assert.equal((await llamar('PUT', `/atenciones/${turnoBeto.id}`, { token: beto.token, cuerpo: { cantidad: -1 } })).estado, 400);
+      assert.equal((await llamar('PUT', `/atenciones/${turnoBeto.id}`, { token: beto.token, cuerpo: { cantidad: 7 } })).estado, 200);
+      assert.equal((await llamar('PUT', `/atenciones/${turnoBeto.id}`, { token: beto.token, cuerpo: { cantidad: 8 } })).estado, 200);
+      const actual = (await llamar<CuadroDto>('GET', `/cuadros/${cuadro.id}`, { token: coord })).cuerpo;
+      const futuro = actual.asignaciones.find((a) => a.usuarioId === ana.usuario.id)!;
+      assert.equal((await llamar('PUT', `/atenciones/${futuro.id}`, { token: ana.token, cuerpo: { cantidad: 2 } })).estado, 400);
+
+      const rango = `desde=${sumarDias(hoy, -3)}&hasta=${sumarDias(hoy, 10)}`;
+      const delCoordinador = await llamar<{ cantidad: number }[]>('GET', `/atenciones?${rango}`, { token: coord });
+      assert.deepEqual(delCoordinador.cuerpo.map((x) => x.cantidad), [8]);
+      assert.deepEqual((await llamar<unknown[]>('GET', `/atenciones?${rango}`, { token: ana.token })).cuerpo, []);
+    });
+
     it('cada enfermero solo consulta sus propias marcaciones', async () => {
       const r = await llamar<MarcacionDto[]>('GET', `/marcaciones?desde=${sumarDias(hoy, -1)}&hasta=${sumarDias(hoy, 1)}&usuarioId=${beto.usuario.id}`, { token: ana.token });
       assert.ok(r.cuerpo.length >= 1);

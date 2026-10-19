@@ -117,3 +117,12 @@ export interface MarcacionGuardada {
   corregidaPor: string | null;
   creadaEn: string;
 }
+
+/** Pacientes atendidos en un turno. El id es el de la asignación: una cantidad por turno. */
+export interface AtencionGuardada {
+  id: string;
+  usuarioId: string;
+  cantidad: number;
+  registradaPor: string;
+  actualizadaEn: string;
+}

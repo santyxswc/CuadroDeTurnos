@@ -1,5 +1,5 @@
 // Datos de ejemplo del prototipo (Sprint 0). No hay API todavía: todo vive en memoria.
-import type { Cargo, CategoriaPermiso, EstadoEgreso, EstadoSolicitud, Rol, TipoDocumento, TipoSolicitud } from '@sgt/shared-types';
+import type { Cargo, CategoriaPermiso, EstadoSolicitud, Rol, TipoSolicitud } from '@sgt/shared-types';
 import { bog, diaSemana, rangoFechas, sumarDias } from './fechas';
 
 /** Hora simulada del prototipo: martes 6 de octubre de 2026, 07:20. */
@@ -205,33 +205,3 @@ export const CATEGORIAS_PERMISO: Record<CategoriaPermiso, string> = {
   OTRO: 'Otro',
 };
 
-export interface Paciente {
-  id: string;
-  usuarioId: string;
-  asignacionId: string;
-  nombre: string;
-  tipoDocumento: TipoDocumento;
-  documento: string;
-  cie10: string;
-  telefono: string;
-  estadoEgreso: EstadoEgreso;
-}
-
-export const DIAGNOSTICOS_CIE10: Record<string, string> = {
-  I10X: 'Hipertensión esencial (primaria)',
-  E119: 'Diabetes mellitus tipo 2 sin complicaciones',
-  J189: 'Neumonía, no especificada',
-  N390: 'Infección de vías urinarias, sitio no especificado',
-  K359: 'Apendicitis aguda, no especificada',
-  I500: 'Insuficiencia cardíaca congestiva',
-  S720: 'Fractura del cuello del fémur',
-};
-
-export const ESTADOS_EGRESO: Record<EstadoEgreso, string> = {
-  CONTINUA_HOSPITALIZADO: 'Continúa hospitalizado',
-  ALTA_MEJORADO: 'Alta - mejorado',
-  REMITIDO: 'Remitido',
-  ALTA_VOLUNTARIA: 'Alta voluntaria',
-  FALLECIDO: 'Fallecido',
-  OTRO: 'Otro',
-};

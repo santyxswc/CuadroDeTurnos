@@ -1,143 +1,171 @@
+// Pacientes atendidos (RF-PAC-01/02): solo la cantidad por turno, sin datos personales de pacientes.
 import { useState } from 'react';
-import type { EstadoEgreso, TipoDocumento } from '@sgt/shared-types';
-import { useEstado, useUsuario } from '../estado';
-import { AHORA, DIAGNOSTICOS_CIE10, ESTADOS_EGRESO, PERSONAS, persona } from '../datos/mock';
-import { diaMes, horaLocal } from '../datos/fechas';
-import { Chip, Tarjeta } from '../componentes/Ui';
+import type { AsignacionDto, AtencionDto, TipoTurnoDto, UsuarioResumenDto } from '@sgt/shared-types';
+import { api } from '../api/cliente';
+import { useAccion, useDatos } from '../api/useDatos';
+import { useSesion } from '../sesion';
+import { diaMes, fechaLocal, finDeMes, horaLocal, horas } from '../datos/fechas';
+import { Chip, Dato, Tarjeta } from '../componentes/Ui';
 
-const enmascarar = (v: string) => `••••${v.slice(-4)}`;
+const EQUIPO = 'equipo';
 
 export function Pacientes() {
-  const usuario = useUsuario()!;
-  const { asignaciones, marcaciones, pacientes, registrarPaciente, verDatoSensible } = useEstado();
-  const esCoordinador = usuario.rol === 'COORDINADOR';
+  const { usuario: yo } = useSesion();
+  const esCoordinador = yo!.rol === 'COORDINADOR';
+  const [mes, setMes] = useState(fechaLocal(new Date()).slice(0, 7));
+  const [personaId, setPersonaId] = useState(esCoordinador ? EQUIPO : yo!.id);
+  const desde = `${mes}-01`;
+  const hasta = finDeMes(desde);
 
-  // Turnos propios en los que marcó entrada (el actual o los recientes).
-  const misTurnos = asignaciones
-    .filter((a) => a.usuarioId === usuario.id && marcaciones[a.id]?.entrada && a.inicio <= AHORA)
-    .sort((a, b) => b.inicio.getTime() - a.inicio.getTime())
-    .slice(0, 5);
+  const turnos = useDatos<AsignacionDto[]>(`/cuadros/asignaciones?desde=${desde}&hasta=${hasta}`);
+  const atenciones = useDatos<AtencionDto[]>(`/atenciones?desde=${desde}&hasta=${hasta}`);
+  const personas = useDatos<UsuarioResumenDto[]>('/usuarios');
+  const tipos = useDatos<TipoTurnoDto[]>('/tipos-turno?incluirInactivos=true');
 
-  const [asignacionId, setAsignacionId] = useState(misTurnos[0]?.id ?? '');
-  const vacio = { nombre: '', tipoDocumento: 'CC' as TipoDocumento, documento: '', cie10: 'I10X', telefono: '', estadoEgreso: 'CONTINUA_HOSPITALIZADO' as EstadoEgreso };
-  const [form, setForm] = useState(vacio);
-  const [visibles, setVisibles] = useState<Record<string, boolean>>({});
-
-  // RNF-14: el detalle solo lo ven quien registró y el coordinador.
-  const lista = pacientes.filter((p) => esCoordinador || p.usuarioId === usuario.id);
-  const valido = asignacionId && form.nombre.trim() && /^\d{5,12}$/.test(form.documento) && (!form.telefono || /^\d{7,10}$/.test(form.telefono));
+  const cantidad = new Map((atenciones.datos ?? []).map((a) => [a.asignacionId, a.cantidad]));
+  const registradas = (atenciones.datos ?? []).filter((a) => personaId === EQUIPO || a.usuarioId === personaId);
+  const total = registradas.reduce((s, a) => s + a.cantidad, 0);
 
   return (
     <div className="pila">
-      <div>
-        <h2>Pacientes atendidos</h2>
-        <p className="sub">Registro por turno de los pacientes atendidos.</p>
-      </div>
-      <div className="alerta-caja aviso">
-        <b>Datos sensibles de salud (Ley 1581 de 2012).</b> Este módulo registra nombre, documento, diagnóstico, teléfono y estado de egreso, como pidió el cliente.
-        En la versión final el documento, el teléfono y el diagnóstico se guardan cifrados y cada consulta queda auditada. <b>Pendiente de aprobación escrita del cliente (ADR-009).</b>
-      </div>
-
-      <div className="columnas c2" style={{ alignItems: 'start' }}>
-        <Tarjeta titulo="Registrar paciente">
-          {misTurnos.length === 0 ? (
-            <p className="sub">No tienes turnos con entrada marcada para registrar pacientes.</p>
-          ) : (
-            <form
-              className="pila"
-              onSubmit={(e) => {
-                e.preventDefault();
-                if (!valido) return;
-                registrarPaciente({ ...form, usuarioId: usuario.id, asignacionId });
-                setForm(vacio);
-              }}
-            >
-              <label>
-                Turno
-                <select value={asignacionId} onChange={(e) => setAsignacionId(e.target.value)}>
-                  {misTurnos.map((a) => <option key={a.id} value={a.id}>{a.codigo} · {diaMes(a.fecha)} {horaLocal(a.inicio)}–{horaLocal(a.fin)}</option>)}
-                </select>
-              </label>
-              <label>Nombre completo<input value={form.nombre} onChange={(e) => setForm({ ...form, nombre: e.target.value })} /></label>
-              <div className="fila">
-                <label style={{ maxWidth: 110 }}>
-                  Tipo doc.
-                  <select value={form.tipoDocumento} onChange={(e) => setForm({ ...form, tipoDocumento: e.target.value as TipoDocumento })}>
-                    {['CC', 'TI', 'RC', 'CE', 'PA', 'PPT'].map((t) => <option key={t}>{t}</option>)}
-                  </select>
-                </label>
-                <label>Número de documento<input inputMode="numeric" value={form.documento} onChange={(e) => setForm({ ...form, documento: e.target.value.replace(/\D/g, '') })} /></label>
-                <label>Teléfono<input inputMode="tel" value={form.telefono} onChange={(e) => setForm({ ...form, telefono: e.target.value.replace(/\D/g, '') })} /></label>
-              </div>
-              <label>
-                Diagnóstico (CIE-10)
-                <select value={form.cie10} onChange={(e) => setForm({ ...form, cie10: e.target.value })}>
-                  {Object.entries(DIAGNOSTICOS_CIE10).map(([k, v]) => <option key={k} value={k}>{k} · {v}</option>)}
-                </select>
-              </label>
-              <label>
-                Estado de egreso
-                <select value={form.estadoEgreso} onChange={(e) => setForm({ ...form, estadoEgreso: e.target.value as EstadoEgreso })}>
-                  {Object.entries(ESTADOS_EGRESO).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
-                </select>
-              </label>
-              <button className="primario" type="submit" disabled={!valido}>Registrar</button>
-            </form>
-          )}
-        </Tarjeta>
-
-        <div className="pila">
-          {esCoordinador && (
-            <Tarjeta titulo="Pacientes por persona (octubre)">
-              <table>
-                <thead><tr><th>Persona</th><th className="num">Pacientes</th><th className="num">Turnos</th><th className="num">Promedio</th></tr></thead>
-                <tbody>
-                  {PERSONAS.map((p) => {
-                    const suyos = pacientes.filter((x) => x.usuarioId === p.id);
-                    const turnos = new Set(suyos.map((x) => x.asignacionId)).size;
-                    return (
-                      <tr key={p.id}>
-                        <td>{p.nombres}</td><td className="num">{suyos.length}</td><td className="num">{turnos}</td>
-                        <td className="num">{turnos ? (suyos.length / turnos).toFixed(1).replace('.', ',') : '—'}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </Tarjeta>
-          )}
-          <Tarjeta titulo={esCoordinador ? 'Registros del equipo' : 'Mis registros'}>
-            <table>
-              <thead><tr><th style={{ whiteSpace: 'nowrap' }}>Turno</th><th>Paciente</th><th>Documento</th><th>Dx</th><th>Teléfono</th><th>Egreso</th><th /></tr></thead>
-              <tbody>
-                {lista.map((p) => {
-                  const a = asignaciones.find((x) => x.id === p.asignacionId);
-                  const ver = visibles[p.id];
-                  return (
-                    <tr key={p.id}>
-                      <td style={{ whiteSpace: 'nowrap' }}>{a && <><Chip codigo={a.codigo} /> {diaMes(a.fecha)}</>}{esCoordinador && <div><small>{persona(p.usuarioId).nombres}</small></div>}</td>
-                      <td>{p.nombre}</td>
-                      <td>{p.tipoDocumento} {ver ? p.documento : enmascarar(p.documento)}</td>
-                      <td title={DIAGNOSTICOS_CIE10[p.cie10]}>{ver ? p.cie10 : '•••'}</td>
-                      <td>{p.telefono ? (ver ? p.telefono : enmascarar(p.telefono)) : '—'}</td>
-                      <td>{ESTADOS_EGRESO[p.estadoEgreso]}</td>
-                      <td>
-                        {!ver && (
-                          <button className="enlace" onClick={() => { verDatoSensible(p.id); setVisibles({ ...visibles, [p.id]: true }); }}>
-                            Ver
-                          </button>
-                        )}
-                      </td>
-                    </tr>
-                  );
-                })}
-                {lista.length === 0 && <tr><td colSpan={7}>Sin registros.</td></tr>}
-              </tbody>
-            </table>
-            <small style={{ color: 'var(--suave)' }}>Al pulsar "Ver" la consulta queda registrada en la auditoría.</small>
-          </Tarjeta>
+      <div className="fila encabezado">
+        <div className="espaciador">
+          <h2>Pacientes atendidos</h2>
+          <p className="sub">Escribe cuántos pacientes atendiste en cada turno. Solo se guarda el número, nunca datos de los pacientes.</p>
         </div>
+        {esCoordinador && (
+          <label>
+            Ver
+            <select value={personaId} onChange={(e) => setPersonaId(e.target.value)}>
+              <option value={EQUIPO}>Todo el equipo</option>
+              {(personas.datos ?? []).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.nombres}
+                </option>
+              ))}
+            </select>
+          </label>
+        )}
+        <label>
+          Mes
+          <input type="month" value={mes} onChange={(e) => e.target.value && setMes(e.target.value)} />
+        </label>
       </div>
+      {(turnos.error ?? atenciones.error) && <div className="alerta-caja error">{turnos.error ?? atenciones.error}</div>}
+
+      <div className="columnas c3">
+        <Dato etiqueta="Pacientes atendidos" valor={total} />
+        <Dato etiqueta="Turnos registrados" valor={registradas.length} />
+        <Dato etiqueta="Promedio por turno" valor={registradas.length ? horas(total / registradas.length) : '—'} />
+      </div>
+
+      {personaId === EQUIPO ? (
+        <ResumenEquipo personas={personas.datos ?? []} atenciones={atenciones.datos ?? []} />
+      ) : (
+        <Tarjeta titulo="Turnos del mes">
+          <table>
+            <thead>
+              <tr>
+                <th>Fecha</th>
+                <th>Turno</th>
+                <th>Horario</th>
+                <th>Pacientes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(turnos.datos ?? [])
+                .filter((a) => a.usuarioId === personaId && a.estado === 'ACTIVA')
+                .map((a) => (
+                  <tr key={a.id}>
+                    <td>{diaMes(a.fecha)}</td>
+                    <td>
+                      <Chip codigo={a.codigo} tipo={tipos.datos?.find((t) => t.id === a.tipoTurnoId)} />
+                    </td>
+                    <td>
+                      {horaLocal(new Date(a.inicio))}–{horaLocal(new Date(a.fin))}
+                    </td>
+                    <td>
+                      {Date.parse(a.inicio) > Date.now() ? (
+                        <span className="vacio">Turno futuro</span>
+                      ) : (
+                        <CampoCantidad asignacionId={a.id} guardada={cantidad.get(a.id)} alGuardar={() => void atenciones.recargar()} />
+                      )}
+                    </td>
+                  </tr>
+                ))}
+              {turnos.datos?.every((a) => a.usuarioId !== personaId) && (
+                <tr>
+                  <td colSpan={4} className="vacio">
+                    No hay turnos publicados en este mes.
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
+        </Tarjeta>
+      )}
     </div>
+  );
+}
+
+function CampoCantidad({ asignacionId, guardada, alGuardar }: { asignacionId: string; guardada?: number; alGuardar: () => void }) {
+  const [valor, setValor] = useState(guardada === undefined ? '' : String(guardada));
+  const accion = useAccion();
+  const cambiado = valor !== '' && Number(valor) !== guardada;
+
+  return (
+    <form
+      className="fila cantidad"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (await accion.ejecutar(() => api('PUT', `/atenciones/${asignacionId}`, { cantidad: Number(valor) }))) alGuardar();
+      }}
+    >
+      <input type="number" min={0} max={200} value={valor} onChange={(e) => setValor(e.target.value)} placeholder="0" />
+      {cambiado ? (
+        <button className="primario" disabled={accion.ocupado}>
+          Guardar
+        </button>
+      ) : (
+        guardada !== undefined && <span className="estado-guardado ok">Guardado</span>
+      )}
+      {accion.error && <span className="error-linea">{accion.error}</span>}
+    </form>
+  );
+}
+
+function ResumenEquipo({ personas, atenciones }: { personas: UsuarioResumenDto[]; atenciones: AtencionDto[] }) {
+  const filas = personas
+    .map((p) => {
+      const suyas = atenciones.filter((a) => a.usuarioId === p.id);
+      const total = suyas.reduce((s, a) => s + a.cantidad, 0);
+      return { p, turnos: suyas.length, total };
+    })
+    .filter((f) => f.turnos > 0 || f.p.activo);
+
+  return (
+    <Tarjeta titulo="Resumen por persona">
+      <table>
+        <thead>
+          <tr>
+            <th>Persona</th>
+            <th className="num">Turnos registrados</th>
+            <th className="num">Pacientes</th>
+            <th className="num">Promedio por turno</th>
+          </tr>
+        </thead>
+        <tbody>
+          {filas.map((f) => (
+            <tr key={f.p.id}>
+              <td>{f.p.nombres}</td>
+              <td className="num">{f.turnos}</td>
+              <td className="num">{f.total}</td>
+              <td className="num">{f.turnos ? horas(f.total / f.turnos) : '—'}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+      <p className="nota">Elige una persona arriba para ver o corregir sus turnos.</p>
+    </Tarjeta>
   );
 }

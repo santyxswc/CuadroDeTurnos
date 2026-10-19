@@ -2,6 +2,7 @@ import { Module, type DynamicModule } from '@nestjs/common';
 import { APP_GUARD } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { AlmacenModule } from './almacen/almacen.module';
+import { AtencionesController } from './atenciones/atenciones.controller';
 import { AuditoriaController } from './auditoria/auditoria.controller';
 import { AuditoriaService } from './auditoria/auditoria.service';
 import { AuthController } from './auth/auth.controller';
@@ -36,6 +37,7 @@ export class AppModule {
         AuditoriaController,
         CuadrosController,
         MarcacionesController,
+        AtencionesController,
       ],
       providers: [
         {

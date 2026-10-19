@@ -12,7 +12,6 @@ import {
   type Asignacion,
   type Marcacion,
   type MensajeChat,
-  type Paciente,
   type Solicitud,
 } from './datos/mock';
 import { diaMes, horaLocal } from './datos/fechas';
@@ -28,14 +27,12 @@ interface Estado {
   marcaciones: Record<string, Marcacion>;
   mensajes: MensajeChat[];
   solicitudes: Solicitud[];
-  pacientes: Paciente[];
   auditoria: string[];
 }
 
 function estadoInicial(): Estado {
   const asignaciones = cuadroOctubre();
   const marcaciones = marcacionesIniciales(asignaciones);
-  const ayerAndres = asignaciones.find((a) => a.usuarioId === 'u1' && a.fin <= AHORA && a.fin > new Date(AHORA.getTime() - 2 * 86_400_000));
   return {
     usuarioId: null,
     asignaciones,
@@ -46,12 +43,6 @@ function estadoInicial(): Estado {
     marcaciones,
     mensajes: MENSAJES_INICIALES,
     solicitudes: SOLICITUDES_INICIALES,
-    pacientes: ayerAndres
-      ? [
-          { id: 'p1', usuarioId: 'u1', asignacionId: ayerAndres.id, nombre: 'María Fernanda López', tipoDocumento: 'CC', documento: '41234567', cie10: 'I10X', telefono: '3104567890', estadoEgreso: 'ALTA_MEJORADO' },
-          { id: 'p2', usuarioId: 'u1', asignacionId: ayerAndres.id, nombre: 'Jorge Enrique Salas', tipoDocumento: 'CC', documento: '79876543', cie10: 'J189', telefono: '3157778899', estadoEgreso: 'CONTINUA_HOSPITALIZADO' },
-        ]
-      : [],
     auditoria: [],
   };
 }
@@ -169,16 +160,6 @@ function useAlmacen() {
 
     cancelarSolicitud: (id: string) =>
       set((prev) => ({ solicitudes: prev.solicitudes.map((s) => (s.id === id ? { ...s, estado: 'CANCELADA' } : s)) })),
-
-    registrarPaciente: (p: Omit<Paciente, 'id'>) =>
-      set((prev) => ({
-        pacientes: [...prev.pacientes, { ...p, id: crypto.randomUUID() }],
-        auditoria: auditar(`registró paciente atendido`)(prev),
-      })),
-
-    /** RNF-15: las lecturas de datos sensibles también se auditan. */
-    verDatoSensible: (pacienteId: string) =>
-      set((prev) => ({ auditoria: auditar(`consultó datos sensibles del paciente ${pacienteId.slice(0, 6)}`)(prev) })),
   };
 }
 

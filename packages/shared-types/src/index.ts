@@ -305,6 +305,15 @@ export interface MiTurnoDto {
   siguiente: TipoMarcacion;
 }
 
+/** Pacientes atendidos en un turno (RF-PAC-01). Solo la cantidad: no se guardan datos de pacientes. */
+export interface AtencionDto {
+  asignacionId: string;
+  usuarioId: string;
+  fecha: string;
+  codigo: string;
+  cantidad: number;
+}
+
 /** Eventos en tiempo real (Socket.IO, RF-MAIN-05). */
 export const EventoTiempoReal = {
   CUADRO_ACTUALIZADO: 'cuadro.actualizado',
