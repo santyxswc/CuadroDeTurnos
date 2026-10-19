@@ -314,10 +314,46 @@ export interface AtencionDto {
   cantidad: number;
 }
 
+export interface SolicitudDto {
+  id: string;
+  tipo: TipoSolicitud;
+  estado: EstadoSolicitud;
+  solicitanteId: string;
+  /** Intercambio y cesión: quien toma el turno. */
+  companeroId: string | null;
+  /** Turno del solicitante que se cede o intercambia. */
+  asignacion: AsignacionDto | null;
+  /** Intercambio: turno del compañero que el solicitante toma a cambio. */
+  asignacionDestino: AsignacionDto | null;
+  /** Permiso y vacaciones: rango de días "YYYY-MM-DD". */
+  desde: string | null;
+  hasta: string | null;
+  categoria: CategoriaPermiso | null;
+  comentario: string;
+  /** Comentario del coordinador (o del compañero si rechazó). */
+  respuesta: string | null;
+  /** Solicitud del propio coordinador: queda aplicada sin aprobación (RF-SOL-08). */
+  autoaprobada: boolean;
+  creadaEn: string;
+  resueltaEn: string | null;
+}
+
+export interface NuevaSolicitudDto {
+  tipo: TipoSolicitud;
+  companeroId?: string;
+  asignacionId?: string;
+  asignacionDestinoId?: string;
+  desde?: string;
+  hasta?: string;
+  categoria?: CategoriaPermiso;
+  comentario?: string;
+}
+
 /** Eventos en tiempo real (Socket.IO, RF-MAIN-05). */
 export const EventoTiempoReal = {
   CUADRO_ACTUALIZADO: 'cuadro.actualizado',
   MARCACION_REGISTRADA: 'marcacion.registrada',
+  SOLICITUD_ACTUALIZADA: 'solicitud.actualizada',
 } as const;
 export type EventoTiempoReal = (typeof EventoTiempoReal)[keyof typeof EventoTiempoReal];
 

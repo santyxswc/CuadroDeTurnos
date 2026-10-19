@@ -179,6 +179,41 @@ export class CuadrosService {
     return this.obtener(id, 'COORDINADOR');
   }
 
+  /** Aplica cambios de celdas que pueden caer en distintos cuadros (p. ej. un intercambio entre meses). */
+  async cambiarCeldasEnFechas(cambios: CambioCeldaDto[], motivo: string, actorId: string) {
+    const porCuadro = new Map<string, CambioCeldaDto[]>();
+    for (const x of cambios) {
+      const c = this.almacen.cuadros.buscar((k) => k.estado !== 'BORRADOR' && k.periodoInicio <= x.fecha && k.periodoFin >= x.fecha);
+      if (!c) throw new BadRequestException(`No hay un cuadro publicado para el ${x.fecha}.`);
+      porCuadro.set(c.id, [...(porCuadro.get(c.id) ?? []), x]);
+    }
+    for (const [id, lista] of porCuadro) await this.cambiarCeldas(id, lista, motivo, actorId);
+  }
+
+  /**
+   * RF-VAC-04: los turnos de la persona en el rango quedan liberados ("requiere cobertura")
+   * en una nueva versión de cada cuadro publicado afectado.
+   */
+  async liberarTurnos(usuarioId: string, desde: string, hasta: string, motivo: string, actorId: string) {
+    const afectados = this.almacen.cuadros.filtrar((c) => c.estado === 'PUBLICADO' && c.periodoInicio <= hasta && c.periodoFin >= desde);
+    for (const { id } of afectados) {
+      const registro: CambioVersionDto[] = [];
+      const c = await this.almacen.cuadros.actualizar(id, (x) => {
+        for (const a of x.asignaciones) {
+          if (a.usuarioId !== usuarioId || a.estado !== 'ACTIVA' || a.fecha < desde || a.fecha > hasta) continue;
+          a.estado = 'LIBERADA';
+          registro.push({ usuarioId, fecha: a.fecha, antes: a.codigo, despues: null });
+        }
+        if (registro.length) {
+          x.versionActual += 1;
+          x.versiones.push({ numero: x.versionActual, autorId: actorId, motivo, creadoEn: new Date().toISOString(), cambios: registro });
+        }
+        return x;
+      });
+      if (registro.length) this.notificar(c!);
+    }
+  }
+
   async publicar(id: string, actorId: string): Promise<CuadroDto> {
     this.existente(id);
     const ahora = new Date().toISOString();

@@ -1,5 +1,17 @@
 // Forma de los documentos guardados en cada archivo JSON de la carpeta de datos.
-import type { CambioVersionDto, Cargo, EstadoAsignacion, EstadoCuadro, Rol, SalarioDto, TipoMarcacion, ValorParametro } from '@sgt/shared-types';
+import type {
+  CambioVersionDto,
+  Cargo,
+  CategoriaPermiso,
+  EstadoAsignacion,
+  EstadoCuadro,
+  EstadoSolicitud,
+  Rol,
+  SalarioDto,
+  TipoMarcacion,
+  TipoSolicitud,
+  ValorParametro,
+} from '@sgt/shared-types';
 
 export interface UsuarioGuardado {
   id: string;
@@ -125,4 +137,23 @@ export interface AtencionGuardada {
   cantidad: number;
   registradaPor: string;
   actualizadaEn: string;
+}
+
+export interface SolicitudGuardada {
+  id: string;
+  tipo: TipoSolicitud;
+  estado: EstadoSolicitud;
+  solicitanteId: string;
+  companeroId: string | null;
+  asignacionId: string | null;
+  asignacionDestinoId: string | null;
+  desde: string | null;
+  hasta: string | null;
+  categoria: CategoriaPermiso | null;
+  comentario: string;
+  respuesta: string | null;
+  autoaprobada: boolean;
+  resueltaPor: string | null;
+  creadaEn: string;
+  resueltaEn: string | null;
 }

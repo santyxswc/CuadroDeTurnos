@@ -9,6 +9,7 @@ import type {
   FestivoGuardado,
   MarcacionGuardada,
   ParametroGuardado,
+  SolicitudGuardada,
   SesionGuardada,
   TipoTurnoGuardado,
   UsuarioGuardado,
@@ -27,6 +28,7 @@ export class AlmacenService implements OnModuleInit {
   readonly cuadros: ColeccionJson<CuadroGuardado>;
   readonly marcaciones: ColeccionJson<MarcacionGuardada>;
   readonly atenciones: ColeccionJson<AtencionGuardada>;
+  readonly solicitudes: ColeccionJson<SolicitudGuardada>;
   readonly auditoria: RegistroJsonl<EventoAuditoria>;
 
   constructor(@Inject(CONFIG) private readonly config: ConfigSgt) {
@@ -39,11 +41,12 @@ export class AlmacenService implements OnModuleInit {
     this.cuadros = new ColeccionJson(ruta('cuadros.json'));
     this.marcaciones = new ColeccionJson(ruta('marcaciones.json'));
     this.atenciones = new ColeccionJson(ruta('atenciones.json'));
+    this.solicitudes = new ColeccionJson(ruta('solicitudes.json'));
     this.auditoria = new RegistroJsonl(ruta('auditoria.jsonl'));
   }
 
   async onModuleInit() {
-    await Promise.all([this.usuarios, this.sesiones, this.tiposTurno, this.parametros, this.festivos, this.cuadros, this.marcaciones, this.atenciones].map((c) => c.cargar()));
+    await Promise.all([this.usuarios, this.sesiones, this.tiposTurno, this.parametros, this.festivos, this.cuadros, this.marcaciones, this.atenciones, this.solicitudes].map((c) => c.cargar()));
     this.logger.log(`Datos cargados desde ${this.config.directorioDatos}`);
     await sembrar(this, this.config, this.logger);
   }

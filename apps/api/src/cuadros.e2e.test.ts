@@ -16,6 +16,7 @@ import type {
   MiTurnoDto,
   RespuestaLoginDto,
   ResumenCuadroDto,
+  SolicitudDto,
   TipoTurnoDto,
   UsuarioConPasswordTemporalDto,
   UsuarioDto,
@@ -310,6 +311,78 @@ describe('API SGT · cuadro de turnos, tiempo real y marcaciones', () => {
       const r = await llamar<MarcacionDto[]>('GET', `/marcaciones?desde=${sumarDias(hoy, -1)}&hasta=${sumarDias(hoy, 1)}&usuarioId=${beto.usuario.id}`, { token: ana.token });
       assert.ok(r.cuerpo.length >= 1);
       assert.ok(r.cuerpo.every((m) => m.usuarioId === ana.usuario.id));
+    });
+  });
+
+  describe('solicitudes (RF-SOL-01 a 05)', () => {
+    // Pasado mañana: lejos del turno de prueba de hoy y antes del miércoles de la próxima semana.
+    const e = sumarDias(hoy, 2);
+    const turnoDe = async (usuarioId: string, fecha: string) =>
+      (await llamar<CuadroDto>('GET', `/cuadros/${cuadro.id}`, { token: coord })).cuerpo.asignaciones.find((a) => a.usuarioId === usuarioId && a.fecha === fecha);
+    let solicitudId: string;
+
+    before(async () => {
+      await llamar('PUT', `/cuadros/${cuadro.id}/celdas`, {
+        token: coord,
+        cuerpo: {
+          cambios: [
+            { usuarioId: ana.usuario.id, fecha: e, tipoTurnoId: tipo('M').id },
+            { usuarioId: beto.usuario.id, fecha: e, tipoTurnoId: tipo('T').id },
+          ],
+          motivo: 'Turnos para probar solicitudes',
+        },
+      });
+    });
+
+    it('intercambio: el compañero acepta, el coordinador aprueba y el cuadro cambia solo', async () => {
+      const r = await llamar<SolicitudDto>('POST', '/solicitudes', {
+        token: ana.token,
+        cuerpo: { tipo: 'INTERCAMBIO', companeroId: beto.usuario.id, asignacionId: (await turnoDe(ana.usuario.id, e))!.id, asignacionDestinoId: (await turnoDe(beto.usuario.id, e))!.id },
+      });
+      assert.equal(r.estado, 201);
+      assert.equal(r.cuerpo.estado, 'PENDIENTE_COMPANERO');
+      solicitudId = r.cuerpo.id;
+
+      assert.equal((await llamar('POST', `/solicitudes/${solicitudId}/resolver`, { token: ana.token, cuerpo: { aprueba: true } })).estado, 403);
+      assert.equal((await llamar('POST', `/solicitudes/${solicitudId}/resolver`, { token: coord, cuerpo: { aprueba: true } })).estado, 400);
+      const aceptada = await llamar<SolicitudDto>('POST', `/solicitudes/${solicitudId}/responder`, { token: beto.token, cuerpo: { acepta: true } });
+      assert.equal(aceptada.cuerpo.estado, 'PENDIENTE_COORDINADOR');
+
+      const aprobada = await llamar<SolicitudDto>('POST', `/solicitudes/${solicitudId}/resolver`, { token: coord, cuerpo: { aprueba: true, respuesta: 'Listo' } });
+      assert.equal(aprobada.cuerpo.estado, 'APLICADA');
+      assert.equal((await turnoDe(ana.usuario.id, e))?.codigo, 'T');
+      assert.equal((await turnoDe(beto.usuario.id, e))?.codigo, 'M');
+    });
+
+    it('no deja ceder un turno a quien ya tiene turno ese día', async () => {
+      const r = await llamar<{ message: string }>('POST', '/solicitudes', {
+        token: ana.token,
+        cuerpo: { tipo: 'CESION', companeroId: beto.usuario.id, asignacionId: (await turnoDe(ana.usuario.id, e))!.id },
+      });
+      assert.equal(r.estado, 400);
+      assert.match(r.cuerpo.message, /ya tiene un turno/);
+    });
+
+    it('permiso aprobado: los turnos de esos días quedan "requiere cobertura"', async () => {
+      const r = await llamar<SolicitudDto>('POST', '/solicitudes', { token: beto.token, cuerpo: { tipo: 'PERMISO', desde: e, hasta: e, categoria: 'CITA_MEDICA' } });
+      assert.equal(r.cuerpo.estado, 'PENDIENTE_COORDINADOR');
+      await llamar('POST', `/solicitudes/${r.cuerpo.id}/resolver`, { token: coord, cuerpo: { aprueba: true } });
+      assert.equal((await turnoDe(beto.usuario.id, e))?.estado, 'LIBERADA');
+    });
+
+    it('vacaciones con poca anticipación se rechazan; una pendiente se puede cancelar', async () => {
+      assert.equal((await llamar('POST', '/solicitudes', { token: ana.token, cuerpo: { tipo: 'VACACIONES', desde: e, hasta: e } })).estado, 400);
+      const r = await llamar<SolicitudDto>('POST', '/solicitudes', { token: ana.token, cuerpo: { tipo: 'VACACIONES', desde: sumarDias(hoy, 30), hasta: sumarDias(hoy, 40) } });
+      assert.equal(r.estado, 201);
+      assert.equal((await llamar('POST', `/solicitudes/${r.cuerpo.id}/cancelar`, { token: beto.token })).estado, 403);
+      assert.equal((await llamar<SolicitudDto>('POST', `/solicitudes/${r.cuerpo.id}/cancelar`, { token: ana.token })).cuerpo.estado, 'CANCELADA');
+    });
+
+    it('cada enfermero ve sus solicitudes y las que le piden; el coordinador ve todas', async () => {
+      const deBeto = (await llamar<SolicitudDto[]>('GET', '/solicitudes', { token: beto.token })).cuerpo;
+      assert.ok(deBeto.every((s) => s.solicitanteId === beto.usuario.id || s.companeroId === beto.usuario.id));
+      assert.equal(deBeto.length, 2);
+      assert.equal((await llamar<SolicitudDto[]>('GET', '/solicitudes', { token: coord })).cuerpo.length, 3);
     });
   });
 });

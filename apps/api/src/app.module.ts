@@ -17,6 +17,8 @@ import { MarcacionesService } from './marcaciones/marcaciones.service';
 import { ParametrosController } from './parametros/parametros.controller';
 import { ParametrosService } from './parametros/parametros.service';
 import { SaludModule } from './salud/salud.module';
+import { SolicitudesController } from './solicitudes/solicitudes.controller';
+import { SolicitudesService } from './solicitudes/solicitudes.service';
 import { EventosGateway } from './tiempo-real/eventos.gateway';
 import { TiposTurnoController } from './tipos-turno/tipos-turno.controller';
 import { UsuariosController } from './usuarios/usuarios.controller';
@@ -38,6 +40,7 @@ export class AppModule {
         CuadrosController,
         MarcacionesController,
         AtencionesController,
+        SolicitudesController,
       ],
       providers: [
         {
@@ -49,6 +52,7 @@ export class AppModule {
         ParametrosService,
         CuadrosService,
         MarcacionesService,
+        SolicitudesService,
         AuthService,
         UsuariosService,
         // Todas las rutas requieren sesión salvo las marcadas con @Publico().
