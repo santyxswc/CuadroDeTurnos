@@ -247,3 +247,7 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
   .barra-cambios { background: #fff; backdrop-filter: none; border: 2px solid var(--texto); }
   .pill, .chip { outline: 1px solid currentColor; }
 }
+
+/* Horas y recargos */
+.columnas.horas { grid-template-columns: 3fr 2fr; align-items: start; }
+.desplazable.alto { max-height: 520px; overflow-y: auto; }
