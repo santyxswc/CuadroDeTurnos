@@ -19,13 +19,13 @@ TurnoCare reemplaza el cuadro de turnos en papel o en hojas de cálculo. Aquí t
 
 | Paso | Qué hacer |
 |---|---|
-| 1 | Abre la app. En una instalación de prueba: `npm run iniciar` en la carpeta del proyecto, y se abre sola en el navegador. |
+| 1 | Instala la app con **TurnoCare-Instalador-0.1.0.exe**: doble clic y listo, no pregunta nada. Se abre sola y deja un ícono **TurnoCare** en el escritorio y en el menú Inicio. Las siguientes veces ábrela desde ese ícono. |
 | 2 | Escribe tu **número de documento** y la **contraseña** que te dio el coordinador. |
 | 3 | La primera vez la app te pide **cambiar la contraseña** por una tuya: mínimo 8 caracteres, con letras y números. |
 | 4 | Muévete con el **menú de la izquierda**. Los **números naranjas** te avisan de lo que espera tu atención (solicitudes por responder, mensajes nuevos). |
 | 5 | Si dejas la app sin usar **15 minutos**, la sesión se cierra sola para proteger tus datos. |
 
-Usuarios de prueba (contraseña `Demo2026`): coordinadora **52123456** (Laura Méndez) y enfermero **80234567** (Andrés Rojas).
+La app viene con un equipo de ejemplo para probarla (contraseña `Demo2026`): coordinadora **52123456** (Laura Méndez) y enfermero **80234567** (Andrés Rojas). En la pantalla de ingreso, pulsa **¿Primera vez?** y elige uno para no tener que escribirlo.
 
 Cuando pasa algo importante (una solicitud nueva, una novedad en el chat) aparece un **aviso abajo a la derecha**. Púlsalo para ir a esa pantalla; si no, desaparece solo.
 
@@ -227,3 +227,12 @@ Revisa la red. La app se reconecta sola y vuelve a cargar los datos al recuperar
 
 **El saldo de vacaciones no coincide con lo que tengo.**
 La app cuenta las vacaciones aprobadas dentro de TurnoCare. Las tomadas antes de usar la app no aparecen; coméntalo con el coordinador.
+
+**Al instalar, Windows dice "Windows protegió su PC".**
+Pasa porque el instalador no tiene firma digital (es un proyecto académico). Pulsa **Más información** y luego **Ejecutar de todas formas**.
+
+**¿Dónde se guardan los datos?**
+En el mismo equipo, en la carpeta `%APPDATA%\TurnoCare\datos` (escríbela en la barra del Explorador de archivos). Para hacer una copia de seguridad, cierra la app y copia esa carpeta. Desinstalar la app no la borra.
+
+**¿Se puede usar en varios computadores a la vez?**
+Cada instalación tiene sus propios datos. Lo normal es instalarla en el computador de la estación de enfermería, donde todo el equipo entra con su usuario.

@@ -13,3 +13,4 @@ coverage/
 # Datos reales de la app (archivos JSON con credenciales y datos de pacientes)
 apps/api/datos/
 dist-test/
+dist-api/

@@ -1,7 +1,9 @@
 // Cliente HTTP de la API. Los tokens viven solo en memoria: al cerrar la app se cierra la sesión.
 import type { RespuestaLoginDto } from '@sgt/shared-types';
 
-export const URL_API: string = import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
+// La app instalada arranca su propia API en un puerto libre y lo pasa en la dirección (?api=...).
+export const URL_API: string =
+  new URLSearchParams(location.search).get('api') ?? import.meta.env.VITE_API_URL ?? 'http://localhost:3000/api';
 
 export class ErrorApi extends Error {
   constructor(

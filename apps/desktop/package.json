@@ -9,18 +9,62 @@
     "build": "tsc -p tsconfig.json --noEmit && vite build && tsc -p tsconfig.electron.json",
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "electron": "tsc -p tsconfig.electron.json && electron .",
-    "electron:dev": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron ."
+    "electron:dev": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
+    "empaquetar": "npm run build -w @sgt/shared-types -w @sgt/rules-engine -w @sgt/api && npm run build && node scripts/empaquetar-api.mjs && electron-builder --win --x64"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
     "@types/react-dom": "^19.3.0",
     "@vitejs/plugin-react": "^6.1.1",
     "electron": "^44.4.5",
-    "vite": "^8.3.1"
-  },
-  "dependencies": {
+    "electron-builder": "^26.15.3",
+    "esbuild": "^0.28.2",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
-    "socket.io-client": "^4.8.4"
+    "socket.io-client": "^4.8.4",
+    "vite": "^8.3.1"
+  },
+  "productName": "TurnoCare",
+  "author": "S4ntyx",
+  "build": {
+    "appId": "co.turnocare.app",
+    "electronVersion": "44.4.5",
+    "extraMetadata": {
+      "name": "turnocare"
+    },
+    "productName": "TurnoCare",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "asar": false,
+    "files": [
+      "package.json",
+      "dist/**",
+      "dist-electron/**/*.js",
+      "dist-api/**",
+      {
+        "from": "../../node_modules/@node-rs",
+        "to": "node_modules/@node-rs",
+        "filter": [
+          "argon2/**",
+          "argon2-win32-x64-msvc/**"
+        ]
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "build/icono.png"
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "createDesktopShortcut": "always",
+      "createStartMenuShortcut": true,
+      "shortcutName": "TurnoCare",
+      "runAfterFinish": true,
+      "deleteAppDataOnUninstall": false,
+      "artifactName": "TurnoCare-Instalador-${version}.exe"
+    }
   }
 }

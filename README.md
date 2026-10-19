@@ -26,7 +26,23 @@ packages/
 docs/             Plan técnico, decisiones, bitácora y documentos del cliente
 ```
 
-## Cómo abrir la aplicación (forma fácil)
+## Instalar en cualquier computador (Windows)
+
+1. Ejecuta **TurnoCare-Instalador-0.1.0.exe**. No pregunta nada: se instala, deja un ícono **TurnoCare** en el escritorio y se abre sola.
+2. Entra con un usuario de ejemplo (en la pantalla de ingreso, **¿Primera vez?**).
+
+No necesita Node.js, internet ni base de datos: la app lleva su propio servidor y guarda los datos en `%APPDATA%\TurnoCare\datos`. Si Windows muestra "Windows protegió su PC", pulsa **Más información → Ejecutar de todas formas** (el instalador no está firmado).
+
+Para generar el instalador desde el código (en Windows, con Node.js 22+):
+
+```bash
+npm install
+npm run instalador
+```
+
+El archivo queda en `apps/desktop/release/`.
+
+## Cómo abrir la aplicación desde el código (forma fácil)
 
 1. Instala [Node.js](https://nodejs.org) (versión 22 o superior). No se necesita base de datos.
 2. Abre una terminal en esta carpeta y escribe, solo la primera vez:

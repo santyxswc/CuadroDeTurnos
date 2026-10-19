@@ -1,6 +1,12 @@
 import { useState } from 'react';
 import { useSesion } from '../sesion';
 
+// Usuarios que crea la app la primera vez que se abre (ver usuarios-demo.ts en la API).
+const EJEMPLOS = [
+  ['52123456', 'Coordinadora: Laura Méndez'],
+  ['80234567', 'Enfermero: Andrés Rojas'],
+];
+
 export function Login() {
   const { iniciar, aviso } = useSesion();
   const [usuario, setUsuario] = useState('');
@@ -44,6 +50,22 @@ export function Login() {
           {cargando ? 'Ingresando…' : 'Ingresar'}
         </button>
         <small style={{ color: 'var(--suave)' }}>¿Olvidaste tu contraseña? Pídele al coordinador que la restablezca.</small>
+        <details className="primera-vez">
+          <summary>¿Primera vez? Entra con un usuario de ejemplo</summary>
+          <p>La app viene con un equipo de ejemplo (contraseña de todos: Demo2026). Pulsa uno para llenar los datos:</p>
+          {EJEMPLOS.map(([documento, texto]) => (
+            <button
+              key={documento}
+              type="button"
+              onClick={() => {
+                setUsuario(documento);
+                setPassword('Demo2026');
+              }}
+            >
+              {texto} · {documento}
+            </button>
+          ))}
+        </details>
       </form>
     </div>
   );

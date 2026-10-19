@@ -233,6 +233,10 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .login .tarjeta { width: 420px; display: flex; flex-direction: column; gap: 14px; padding: 28px; }
 .login .marca { color: var(--menu); padding: 0; font-size: 28px; }
 .login .marca b { color: var(--primario); }
+.primera-vez { font-size: 13px; color: var(--suave); }
+.primera-vez summary { cursor: pointer; color: var(--primario); font-weight: 600; }
+.primera-vez p { margin: 8px 0; }
+.primera-vez button { display: block; width: 100%; text-align: left; margin-top: 6px; }
 
 /* Accesibilidad: alternativas más tranquilas según las preferencias del sistema. */
 @media (prefers-reduced-motion: reduce) {
