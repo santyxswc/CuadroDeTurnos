@@ -10,7 +10,7 @@
     "typecheck": "tsc -p tsconfig.json --noEmit && tsc -p tsconfig.electron.json --noEmit",
     "electron": "tsc -p tsconfig.electron.json && electron .",
     "electron:dev": "tsc -p tsconfig.electron.json && VITE_DEV_SERVER_URL=http://localhost:5173 electron .",
-    "empaquetar": "npm run build -w @sgt/shared-types -w @sgt/rules-engine -w @sgt/api && npm run build && node scripts/empaquetar-api.mjs && electron-builder --win --x64"
+    "empaquetar": "npm run build -w @sgt/shared-types -w @sgt/rules-engine -w @sgt/api && npm run build && node scripts/empaquetar-api.mjs && node scripts/instalador.mjs"
   },
   "devDependencies": {
     "@types/react": "^19.3.0",
