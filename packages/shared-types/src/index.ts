@@ -193,20 +193,135 @@ export interface EventoAuditoriaDto {
 
 export interface AsignacionDto {
   id: string;
+  cuadroId: string;
   usuarioId: string;
   tipoTurnoId: string;
+  /** Código del tipo de turno cuando se asignó (M, T, N…). */
+  codigo: string;
+  /** Día local en que empieza el turno, "YYYY-MM-DD". */
+  fecha: string;
   /** ISO 8601 en UTC. */
   inicio: string;
   fin: string;
   estado: EstadoAsignacion;
 }
 
+export interface ResumenCuadroDto {
+  id: string;
+  /** "YYYY-MM-DD" */
+  periodoInicio: string;
+  periodoFin: string;
+  estado: EstadoCuadro;
+  /** 0 mientras es borrador; 1 al publicar y +1 por cada cambio posterior (RF-CUA-05). */
+  versionActual: number;
+  creadoEn: string;
+  publicadoEn: string | null;
+  cerradoEn: string | null;
+}
+
+/** Cambio de una celda de la grilla: una persona, un día. `tipoTurnoId: null` deja el día libre. */
+export interface CambioCeldaDto {
+  usuarioId: string;
+  fecha: string;
+  tipoTurnoId: string | null;
+}
+
+export interface CambioVersionDto {
+  usuarioId: string;
+  fecha: string;
+  /** Código del turno antes y después; null = día libre. */
+  antes: string | null;
+  despues: string | null;
+}
+
+export interface VersionCuadroDto {
+  numero: number;
+  autorId: string;
+  autorNombre: string | null;
+  motivo: string;
+  creadoEn: string;
+  cambios: CambioVersionDto[];
+}
+
+/** Advertencias de reglas de una asignación (RF-CUA-03). No bloquean: el coordinador decide. */
+export interface AdvertenciaAsignacionDto {
+  asignacionId: string;
+  clasificacion: 'NO_APTO' | 'APTO_CON_ADVERTENCIA';
+  motivos: string[];
+}
+
+/** Horas programadas de una persona en una semana (lunes a domingo, RN-02). */
+export interface HorasSemanaDto {
+  usuarioId: string;
+  /** Lunes de la semana, "YYYY-MM-DD". */
+  lunes: string;
+  horas: number;
+  maximaH: number;
+  /** Jornada máxima + tope de horas extra. */
+  topeH: number;
+}
+
+export interface CuadroDto extends ResumenCuadroDto {
+  /** Asignaciones vigentes (activas o liberadas). Las reemplazadas solo quedan en el historial. */
+  asignaciones: AsignacionDto[];
+  /** Solo para el coordinador. */
+  advertencias: AdvertenciaAsignacionDto[];
+  semanas: HorasSemanaDto[];
+  versiones: VersionCuadroDto[];
+}
+
+export interface MarcacionDto {
+  id: string;
+  usuarioId: string;
+  /** null = marcación sin turno, queda para revisión del coordinador (RF-ASI-02). */
+  asignacionId: string | null;
+  tipo: TipoMarcacion;
+  /** Hora del servidor, ISO 8601 en UTC (RF-ASI-01). */
+  hora: string;
+  equipo: string | null;
+  corregida: boolean;
+  motivoCorreccion: string | null;
+  corregidaPor: string | null;
+}
+
 export interface IndicadorTurnoDto {
   usuarioId: string;
   asignacionId: string;
+  codigo: string;
+  inicio: string;
+  fin: string;
   estado: EstadoTurno;
   entrada?: string;
   salida?: string;
+}
+
+/** Lo que necesita la página principal para el botón de marcar (RF-MAIN-04). */
+export interface MiTurnoDto {
+  /** Hora del servidor, para que la app no dependa del reloj del equipo. */
+  ahora: string;
+  /** Turno con el que se asociaría la próxima marcación, si hay uno dentro de la ventana. */
+  turno: IndicadorTurnoDto | null;
+  /** Próxima acción al presionar el botón. */
+  siguiente: TipoMarcacion;
+}
+
+/** Eventos en tiempo real (Socket.IO, RF-MAIN-05). */
+export const EventoTiempoReal = {
+  CUADRO_ACTUALIZADO: 'cuadro.actualizado',
+  MARCACION_REGISTRADA: 'marcacion.registrada',
+} as const;
+export type EventoTiempoReal = (typeof EventoTiempoReal)[keyof typeof EventoTiempoReal];
+
+export interface EventoCuadroDto {
+  cuadroId: string;
+  estado: EstadoCuadro;
+  versionActual: number;
+}
+
+export interface EventoMarcacionDto {
+  usuarioId: string;
+  tipo: TipoMarcacion;
+  hora: string;
 }
 
 export interface MensajeChatDto {
