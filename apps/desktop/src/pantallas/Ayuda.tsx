@@ -133,7 +133,7 @@ const PREGUNTAS: [string, ReactNode][] = [
   ['¿Por qué no puedo cederle mi turno a un compañero?', 'La app revisa que tu compañero no quede sin descanso, con demasiadas horas o con dos turnos el mismo día. Mira el Filtro de aptos para ver quién sí puede.'],
   ['Mi solicitud dice "Pendiente de compañero".', 'Tu compañero debe aceptarla desde su pantalla de Solicitudes. Le aparece un aviso y un número en el menú.'],
   ['Un turno aparece tachado.', 'Quedó libre (por un permiso o vacaciones aprobados) y necesita a alguien que lo cubra. El chat también lo avisa.'],
-  ['Dice "Sin conexión" o no se actualiza.', 'Revisa que la red funcione. La app se reconecta sola y vuelve a cargar los datos al recuperar la conexión.'],
+  ['En «Estado del turno actual» dice "Sin conexión".', 'Revisa que la red funcione. La app se reconecta sola y vuelve a cargar los datos al recuperar la conexión.'],
 ];
 
 export function Ayuda({ ir }: { ir: (r: Ruta) => void }) {

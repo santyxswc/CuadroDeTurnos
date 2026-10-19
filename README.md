@@ -18,7 +18,7 @@ Entrega comprometida: **11 de noviembre de 2026**.
 
 ```
 apps/
-  desktop/        App de escritorio (Electron + React). Login, administración, editor de cuadro y página principal usan la API; el resto, datos de ejemplo
+  desktop/        App de escritorio (Electron + React). Todas las pantallas usan la API
   api/            API NestJS; guarda los datos en archivos JSON (carpeta apps/api/datos/, ignorada por git)
 packages/
   shared-types/   Enums, DTOs y parámetros laborales por defecto
@@ -41,6 +41,8 @@ docs/             Plan técnico, decisiones, bitácora y documentos del cliente
 
 Usuarios de ejemplo (contraseña `Demo2026`): coordinadora **52123456** (Laura Méndez) y enfermero **80234567** (Andrés Rojas).
 
+¿Primera vez? Abre **Ayuda** en el menú de la app o lee la [guía de usuario](docs/06_Guia_de_Usuario.md).
+
 ## Cómo ejecutar por partes (desarrollo)
 
 ```bash
@@ -55,7 +57,7 @@ npm run start -w @sgt/api
 # 2. App en el navegador (http://localhost:5173), en otra terminal
 npm run dev:desktop
 
-# Prototipo como app de escritorio (ver nota sobre Electron abajo)
+# Como app de escritorio (ver nota sobre Electron abajo)
 npm run build -w @sgt/desktop
 npm run electron -w @sgt/desktop
 
@@ -75,3 +77,5 @@ npm test
 - [Bitácora del Sprint 0](docs/03_Bitacora_Sprint0.md)
 - [Bitácora del Sprint 1](docs/04_Bitacora_Sprint1.md): autenticación, administración y endpoints de la API
 - [Bitácora del Sprint 2](docs/05_Bitacora_Sprint2.md): cuadro de turnos con versiones, tiempo real (Socket.IO) y marcaciones
+- [Bitácora de los Sprints 3 a 5](docs/07_Bitacora_Sprint3_a_5.md): horas, pacientes, solicitudes, vacaciones, aptos, chat, avisos y exportación
+- [Guía de usuario](docs/06_Guia_de_Usuario.md): cómo usar cada pantalla, para enfermeros y coordinadores
