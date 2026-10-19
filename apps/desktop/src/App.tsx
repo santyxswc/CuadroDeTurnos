@@ -32,7 +32,7 @@ const MENU: { ruta: Ruta; texto: string; soloCoordinador?: boolean }[] = [
 ];
 
 /** Pantallas que ya trabajan con la API; las demás muestran el aviso de datos de ejemplo. */
-const CONECTADAS: Ruta[] = ['inicio', 'editor', 'solicitudes', 'horas', 'pacientes', 'admin'];
+const CONECTADAS: Ruta[] = ['inicio', 'editor', 'solicitudes', 'aptos', 'horas', 'vacaciones', 'pacientes', 'admin'];
 
 export function App() {
   const sesion = useSesion();

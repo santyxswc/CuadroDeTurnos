@@ -1,5 +1,5 @@
 // Página principal (RF-MAIN-01 a 06). Marcación, indicadores y cuadro vienen de la API y se actualizan en tiempo real;
-// el chat, el saldo de vacaciones y las solicitudes siguen con datos de ejemplo hasta su sprint.
+// solo el chat sigue con datos de ejemplo hasta su sprint.
 import { useEffect, useMemo, useState } from 'react';
 import {
   EventoTiempoReal,
@@ -8,6 +8,7 @@ import {
   type IndicadorTurnoDto,
   type MarcacionDto,
   type MiTurnoDto,
+  type ParametroDto,
   type SolicitudDto,
   type TipoTurnoDto,
   type UsuarioResumenDto,
@@ -19,6 +20,7 @@ import { useSesion } from '../sesion';
 import { useEstado, useUsuario } from '../estado';
 import { persona } from '../datos/mock';
 import { diaMes, diaSemana, encabezadoDia, fechaLocal, horaLocal, horas, lunesDe, rangoFechas, sumarDias } from '../datos/fechas';
+import { parametro } from '../datos/liquidacion';
 import { saldoVacaciones } from '../datos/vacaciones';
 import { Chip, Dato, Estado, Tarjeta } from '../componentes/Ui';
 
@@ -73,7 +75,7 @@ export function Inicio() {
           nota={mias[0] ? `${hora(mias[0].inicio)}–${hora(mias[0].fin)}${mias.length > 1 ? ` · luego ${mias.slice(1, 3).map((a) => `${a.codigo} ${diaMes(a.fecha)}`).join(', ')}` : ''}` : 'Sin turnos publicados'}
         />
         <Dato etiqueta={lunes === lunesDe(hoy) ? 'Horas programadas esta semana' : `Horas programadas semana del ${diaMes(lunes)}`} valor={horas(horasSemana)} nota="Según el cuadro publicado" />
-        <ResumenEjemplo />
+        <Resumen />
       </div>
 
       <div className="columnas principal">
@@ -254,18 +256,26 @@ function Indicadores({ nombres, tipos }: { nombres: Map<string, string>; tipos: 
   );
 }
 
-/** Solicitudes pendientes (reales) y saldo de vacaciones (todavía de ejemplo). */
-function ResumenEjemplo() {
+/** Saldo de vacaciones y solicitudes pendientes. */
+function Resumen() {
   const { usuario: yo } = useSesion();
-  const usuario = useUsuario();
-  const { solicitudes } = useEstado();
   const reales = useDatos<SolicitudDto[]>('/solicitudes');
+  const festivos = useDatos<FestivoDto[]>('/festivos');
+  const parametros = useDatos<ParametroDto[]>('/parametros');
   useTiempoReal([EventoTiempoReal.SOLICITUD_ACTUALIZADA], () => void reales.recargar());
-  if (!usuario) return null;
-  const pendientes = (reales.datos ?? []).filter((s) => s.solicitanteId === yo!.id && s.estado.startsWith('PENDIENTE')).length;
+  if (!yo) return null;
+  const lista = reales.datos ?? [];
+  const pendientes = lista.filter((s) => s.solicitanteId === yo.id && s.estado.startsWith('PENDIENTE')).length;
+  const saldo = saldoVacaciones(
+    yo,
+    lista,
+    new Set((festivos.datos ?? []).map((f) => f.fecha)),
+    fechaLocal(new Date()),
+    parametro(parametros.datos, 'vacaciones.dias_por_anio'),
+  );
   return (
     <>
-      <Dato etiqueta="Saldo de vacaciones" valor={`${saldoVacaciones(usuario, solicitudes).disponibles} días`} nota="Dato de ejemplo" />
+      <Dato etiqueta="Saldo de vacaciones" valor={`${saldo.disponibles} días`} nota="Ver detalle en Vacaciones" />
       <Dato etiqueta="Mis solicitudes pendientes" valor={pendientes} nota="Ver detalle en Solicitudes" />
     </>
   );
