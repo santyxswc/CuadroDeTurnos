@@ -84,6 +84,14 @@ export const CategoriaPermiso = {
 } as const;
 export type CategoriaPermiso = (typeof CategoriaPermiso)[keyof typeof CategoriaPermiso];
 
+export const NOMBRE_CATEGORIA_PERMISO: Record<CategoriaPermiso, string> = {
+  PERSONAL: 'Personal',
+  CALAMIDAD: 'Calamidad doméstica',
+  CITA_MEDICA: 'Cita médica',
+  ACADEMICO: 'Académico',
+  OTRO: 'Otro',
+};
+
 /** Estado de egreso del paciente (RF-PAC-05). */
 export const EstadoEgreso = {
   CONTINUA_HOSPITALIZADO: 'CONTINUA_HOSPITALIZADO',
@@ -354,6 +362,7 @@ export const EventoTiempoReal = {
   CUADRO_ACTUALIZADO: 'cuadro.actualizado',
   MARCACION_REGISTRADA: 'marcacion.registrada',
   SOLICITUD_ACTUALIZADA: 'solicitud.actualizada',
+  CHAT_ACTUALIZADO: 'chat.actualizado',
 } as const;
 export type EventoTiempoReal = (typeof EventoTiempoReal)[keyof typeof EventoTiempoReal];
 
@@ -371,10 +380,16 @@ export interface EventoMarcacionDto {
 
 export interface MensajeChatDto {
   id: string;
-  autorId: string;
+  /** null en los mensajes automáticos del sistema. */
+  autorId: string | null;
   contenido: string;
   esNovedad: boolean;
   creadoEn: string;
+}
+
+export interface NuevoMensajeDto {
+  contenido: string;
+  esNovedad?: boolean;
 }
 
 // ---------------------------------------------------------------------------

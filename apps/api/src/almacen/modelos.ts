@@ -157,3 +157,14 @@ export interface SolicitudGuardada {
   creadaEn: string;
   resueltaEn: string | null;
 }
+
+export interface MensajeGuardado {
+  id: string;
+  /** null en los mensajes automáticos del sistema. */
+  autorId: string | null;
+  contenido: string;
+  esNovedad: boolean;
+  creadoEn: string;
+  /** Si el coordinador lo ocultó; no se borra para que quede constancia. */
+  ocultoPor: string | null;
+}

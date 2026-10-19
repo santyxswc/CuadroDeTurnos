@@ -16,7 +16,8 @@ import { randomUUID } from 'node:crypto';
 import { AlmacenService } from '../almacen/almacen.service';
 import type { AsignacionGuardada, CuadroGuardado } from '../almacen/modelos';
 import { AuditoriaService } from '../auditoria/auditoria.service';
-import { diasEntre, esFechaValida, hoyBogota, intervaloTurno, lunesDe } from '../comun/fechas';
+import { ChatService } from '../chat/chat.service';
+import { diaMes, diasEntre, esFechaValida, hoyBogota, intervaloTurno, lunesDe } from '../comun/fechas';
 import { ParametrosService } from '../parametros/parametros.service';
 import { EventosGateway } from '../tiempo-real/eventos.gateway';
 
@@ -49,6 +50,7 @@ export class CuadrosService {
     private readonly auditoria: AuditoriaService,
     private readonly parametros: ParametrosService,
     private readonly eventos: EventosGateway,
+    private readonly chat: ChatService,
   ) {}
 
   /** Los enfermeros no ven borradores. */
@@ -210,7 +212,10 @@ export class CuadrosService {
         }
         return x;
       });
-      if (registro.length) this.notificar(c!);
+      if (!registro.length) continue;
+      this.notificar(c!);
+      const nombre = this.almacen.usuarios.obtener(usuarioId)?.nombres ?? 'una persona';
+      for (const r of registro) await this.chat.sistema(`El turno ${r.antes} del ${diaMes(r.fecha)} de ${nombre} requiere cobertura.`);
     }
   }
 
@@ -231,6 +236,7 @@ export class CuadrosService {
     const advertencias = this.advertencias(c!).length;
     await this.auditoria.registrar({ actorId, accion: 'CUADRO_PUBLICADO', entidad: 'cuadro', entidadId: id, despues: { ...aResumen(c!), advertencias } });
     this.notificar(c!);
+    await this.chat.sistema(`Se publicó el cuadro de turnos del ${diaMes(c!.periodoInicio)} al ${diaMes(c!.periodoFin)}. Ya lo pueden consultar.`);
     return this.obtener(id, 'COORDINADOR');
   }
 

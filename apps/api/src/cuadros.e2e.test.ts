@@ -13,6 +13,7 @@ import type {
   EventoAuditoriaDto,
   IndicadorTurnoDto,
   MarcacionDto,
+  MensajeChatDto,
   MiTurnoDto,
   RespuestaLoginDto,
   ResumenCuadroDto,
@@ -21,6 +22,7 @@ import type {
   UsuarioConPasswordTemporalDto,
   UsuarioDto,
 } from '@sgt/shared-types';
+import { EventoTiempoReal } from '@sgt/shared-types';
 import { io, type Socket } from 'socket.io-client';
 import { crearApp } from './app';
 import { hoyBogota, lunesDe, sumarDias } from './comun/fechas';
@@ -383,6 +385,48 @@ describe('API SGT · cuadro de turnos, tiempo real y marcaciones', () => {
       assert.ok(deBeto.every((s) => s.solicitanteId === beto.usuario.id || s.companeroId === beto.usuario.id));
       assert.equal(deBeto.length, 2);
       assert.equal((await llamar<SolicitudDto[]>('GET', '/solicitudes', { token: coord })).cuerpo.length, 3);
+    });
+  });
+
+  describe('chat del equipo (Sprint 5)', () => {
+    it('el sistema avisa en el chat al publicar y cuando un turno requiere cobertura (RF-CHAT-05)', async () => {
+      const r = await llamar<MensajeChatDto[]>('GET', '/chat', { token: ana.token });
+      assert.ok(r.cuerpo.some((m) => m.autorId === null && /Se publicó el cuadro/.test(m.contenido)));
+      assert.ok(r.cuerpo.some((m) => m.autorId === null && m.esNovedad && /requiere cobertura/.test(m.contenido)));
+    });
+
+    it('envía un mensaje, lo reparte en tiempo real y marca la novedad (RF-CHAT-01/03)', async () => {
+      const socket: Socket = io(url, { auth: { token: beto.token }, transports: ['websocket'] });
+      await new Promise<void>((ok) => socket.on('connect', ok));
+      const recibido = new Promise<MensajeChatDto>((ok) => socket.on(EventoTiempoReal.CHAT_ACTUALIZADO, ok));
+      const r = await llamar<MensajeChatDto>('POST', '/chat', { token: ana.token, cuerpo: { contenido: '  Llegó el pedido de insumos  ', esNovedad: true } });
+      assert.equal(r.estado, 201);
+      assert.equal(r.cuerpo.contenido, 'Llegó el pedido de insumos');
+      assert.equal((await recibido).id, r.cuerpo.id);
+      socket.close();
+      assert.equal((await llamar('POST', '/chat', { token: ana.token, cuerpo: { contenido: '   ' } })).estado, 400);
+    });
+
+    it('el historial va en orden y se pagina hacia atrás', async () => {
+      const todos = (await llamar<MensajeChatDto[]>('GET', '/chat', { token: coord })).cuerpo;
+      assert.deepEqual(todos.map((m) => m.creadoEn), [...todos.map((m) => m.creadoEn)].sort());
+      const ultimo = (await llamar<MensajeChatDto[]>('GET', '/chat?limite=1', { token: coord })).cuerpo;
+      assert.equal(ultimo.length, 1);
+      assert.equal(ultimo[0].id, todos.at(-1)!.id);
+      const anteriores = (await llamar<MensajeChatDto[]>('GET', `/chat?antes=${encodeURIComponent(ultimo[0].creadoEn)}`, { token: coord })).cuerpo;
+      assert.equal(anteriores.length, todos.length - 1);
+    });
+
+    it('cada quien borra solo sus mensajes; el coordinador oculta cualquiera y queda auditado (RF-CHAT-04)', async () => {
+      const deAna = (await llamar<MensajeChatDto>('POST', '/chat', { token: ana.token, cuerpo: { contenido: 'Me equivoqué' } })).cuerpo;
+      assert.equal((await llamar('DELETE', `/chat/${deAna.id}`, { token: beto.token })).estado, 403);
+      assert.equal((await llamar('DELETE', `/chat/${deAna.id}`, { token: ana.token })).estado, 204);
+      const deBeto = (await llamar<MensajeChatDto>('POST', '/chat', { token: beto.token, cuerpo: { contenido: 'Mensaje fuera de lugar' } })).cuerpo;
+      assert.equal((await llamar('DELETE', `/chat/${deBeto.id}`, { token: coord })).estado, 204);
+      const quedan = (await llamar<MensajeChatDto[]>('GET', '/chat', { token: ana.token })).cuerpo;
+      assert.ok(!quedan.some((m) => m.id === deAna.id || m.id === deBeto.id));
+      const auditoria = (await llamar<EventoAuditoriaDto[]>('GET', '/auditoria', { token: coord })).cuerpo;
+      assert.ok(auditoria.some((e) => e.accion === 'MENSAJE_OCULTADO' && e.entidadId === deBeto.id));
     });
   });
 });

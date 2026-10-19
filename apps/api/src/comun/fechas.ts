@@ -27,3 +27,6 @@ export function intervaloTurno(fecha: string, horaInicio: string, horaFin: strin
   const fin = aInstante(horaFin > horaInicio ? fecha : sumarDias(fecha, 1), horaFin);
   return { inicio, fin };
 }
+
+/** "2026-10-20" → "20/10", para mensajes. */
+export const diaMes = (fecha: string) => `${fecha.slice(8, 10)}/${fecha.slice(5, 7)}`;

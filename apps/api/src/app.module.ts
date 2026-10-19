@@ -7,6 +7,8 @@ import { AuditoriaController } from './auditoria/auditoria.controller';
 import { AuditoriaService } from './auditoria/auditoria.service';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
+import { ChatController } from './chat/chat.controller';
+import { ChatService } from './chat/chat.service';
 import { AutenticacionGuard } from './auth/autenticacion.guard';
 import { CONFIG, type ConfigSgt } from './config';
 import { CuadrosController } from './cuadros/cuadros.controller';
@@ -41,6 +43,7 @@ export class AppModule {
         MarcacionesController,
         AtencionesController,
         SolicitudesController,
+        ChatController,
       ],
       providers: [
         {
@@ -49,6 +52,7 @@ export class AppModule {
         },
         AuditoriaService,
         EventosGateway,
+        ChatService,
         ParametrosService,
         CuadrosService,
         MarcacionesService,
