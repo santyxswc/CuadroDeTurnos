@@ -18,7 +18,7 @@ Entrega comprometida: **11 de noviembre de 2026**.
 
 ```
 apps/
-  desktop/        App de escritorio (Electron + React). Hoy: prototipo navegable con datos de ejemplo
+  desktop/        App de escritorio (Electron + React). Login, administración, editor de cuadro y página principal usan la API; el resto, datos de ejemplo
   api/            API NestJS; guarda los datos en archivos JSON (carpeta apps/api/datos/, ignorada por git)
 packages/
   shared-types/   Enums, DTOs y parámetros laborales por defecto
@@ -61,3 +61,4 @@ npm test
 - [Decisiones a partir de las respuestas del cliente](docs/02_Decisiones_Respuestas_Cliente.md)
 - [Bitácora del Sprint 0](docs/03_Bitacora_Sprint0.md)
 - [Bitácora del Sprint 1](docs/04_Bitacora_Sprint1.md): autenticación, administración y endpoints de la API
+- [Bitácora del Sprint 2](docs/05_Bitacora_Sprint2.md): cuadro de turnos con versiones, tiempo real (Socket.IO) y marcaciones
