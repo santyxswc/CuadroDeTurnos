@@ -84,7 +84,6 @@ label.check input { width: auto; }
 .sesion .enlace { grid-column: 2; justify-self: start; color: #6fd3c7; }
 .avatar { width: 36px; height: 36px; border-radius: 50%; background: #6fd3c7; color: var(--menu); display: grid; place-items: center; font-weight: 700; }
 .contenido { overflow: auto; padding: 0 24px 24px; }
-.aviso-prototipo { background: #fff6dd; color: #7a5a00; font-size: 12px; padding: 6px 12px; margin: 0 -24px 18px; border-bottom: 1px solid #f1e0a8; }
 
 /* Tarjetas y grillas */
 .tarjeta { background: var(--superficie); border: 1px solid var(--borde); border-radius: 10px; padding: 16px; }
@@ -257,3 +256,31 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .fila.cantidad input { width: 80px; }
 .error-linea { color: var(--rojo); font-size: 12px; }
 .pila.compacta { gap: 6px; }
+
+/* Chat */
+.mensaje header .borrar { margin-left: auto; font-size: 12px; }
+.chat .centrado { align-self: center; font-size: 12px; }
+.mensaje { white-space: pre-wrap; overflow-wrap: anywhere; }
+
+/* Avisos emergentes: aparecen abajo a la derecha y se van solos. */
+.avisos { position: fixed; right: 20px; bottom: 20px; display: flex; flex-direction: column; gap: 8px; z-index: 50; max-width: 340px; }
+.aviso {
+  text-align: left; background: rgba(15, 61, 69, .92); color: #fff; border: 0; border-radius: 10px; padding: 11px 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, .18); backdrop-filter: blur(12px); animation: entrar-aviso .22s cubic-bezier(.2, .8, .2, 1);
+}
+.aviso:hover { background: var(--menu); }
+@keyframes entrar-aviso { from { opacity: 0; transform: translateY(8px) scale(.98); } }
+@media (prefers-reduced-transparency: reduce) { .aviso { background: var(--menu); backdrop-filter: none; } }
+
+/* Ayuda */
+.ayuda .para { margin: 0 0 8px; color: var(--suave); }
+.pasos { margin: 0; padding-left: 20px; display: flex; flex-direction: column; gap: 6px; }
+.extra-coordinador { margin-top: 10px; background: #eef6f6; border-radius: 8px; padding: 8px 12px; font-size: 13px; }
+.extra-coordinador ul { margin: 4px 0 0; padding-left: 18px; }
+.leyenda { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
+.leyenda h4 { margin: 0 0 6px; font-size: 13px; }
+.leyenda p { margin: 4px 0; font-size: 13px; color: var(--suave); }
+.preguntas details { border-top: 1px solid var(--borde); padding: 8px 0; }
+.preguntas details:first-child { border-top: 0; }
+.preguntas summary { cursor: pointer; font-weight: 600; }
+.preguntas p { margin: 6px 0 0; color: var(--suave); }

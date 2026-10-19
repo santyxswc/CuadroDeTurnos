@@ -2,6 +2,7 @@
 import { useState } from 'react';
 import {
   EventoTiempoReal,
+  NOMBRE_CATEGORIA_PERMISO,
   type AsignacionDto,
   type CategoriaPermiso,
   type NuevaSolicitudDto,
@@ -14,7 +15,6 @@ import { api } from '../api/cliente';
 import { useAccion, useDatos } from '../api/useDatos';
 import { useTiempoReal } from '../api/tiempoReal';
 import { useSesion } from '../sesion';
-import { CATEGORIAS_PERMISO } from '../datos/mock';
 import { diaMes, fechaHora, fechaLocal, horaLocal, sumarDias } from '../datos/fechas';
 import { Chip, Estado, Tarjeta } from '../componentes/Ui';
 
@@ -97,7 +97,7 @@ function Detalle({ s, catalogos }: { s: SolicitudDto; catalogos: Catalogos }) {
     );
   }
   const rango = s.desde === s.hasta ? diaMes(s.desde!) : `${diaMes(s.desde!)} al ${diaMes(s.hasta!)}`;
-  return <>{`${rango}${s.categoria ? ` · ${CATEGORIAS_PERMISO[s.categoria]}` : ''}`}</>;
+  return <>{`${rango}${s.categoria ? ` · ${NOMBRE_CATEGORIA_PERMISO[s.categoria]}` : ''}`}</>;
 }
 
 function Bandeja({ lista, catalogos, alCambiar }: { lista: SolicitudDto[]; catalogos: Catalogos; alCambiar: () => void }) {
@@ -307,7 +307,7 @@ function Nueva({ catalogos, alTerminar }: { catalogos: Catalogos; alTerminar: ()
               <label>
                 Motivo
                 <select value={categoria} onChange={(e) => setCategoria(e.target.value as CategoriaPermiso)}>
-                  {Object.entries(CATEGORIAS_PERMISO).map(([k, v]) => (
+                  {Object.entries(NOMBRE_CATEGORIA_PERMISO).map(([k, v]) => (
                     <option key={k} value={k}>
                       {v}
                     </option>

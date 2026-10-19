@@ -2,6 +2,7 @@
 import { Fragment, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EventoTiempoReal,
+  NOMBRE_CARGO,
   type CuadroDto,
   type EventoCuadroDto,
   type FestivoDto,
@@ -13,6 +14,7 @@ import { api } from '../api/cliente';
 import { useAccion, useDatos } from '../api/useDatos';
 import { useTiempoReal } from '../api/tiempoReal';
 import { diaMes, diaSemana, encabezadoDia, fechaHora, fechaLocal, finDeMes, horas, lunesDe, rangoFechas, sumarDias } from '../datos/fechas';
+import { descargarCsv } from '../datos/exportar';
 import { Chip, Estado, Tarjeta } from '../componentes/Ui';
 
 /** Pincel que deja el día libre. */
@@ -283,6 +285,20 @@ function Grilla({ id, alCambiarLista, alDescartar }: { id: string; alCambiarList
   };
   const nombre = (usuarioId: string) => usuarios.datos?.find((u) => u.id === usuarioId)?.nombres ?? 'Persona';
 
+  // RF-REP: el cuadro tal como se ve, una fila por persona y una columna por día.
+  const exportar = () =>
+    descargarCsv(`cuadro-${cuadro.periodoInicio}-a-${cuadro.periodoFin}`, [
+      ['Persona', 'Cargo', ...datos.dias],
+      ...datos.personas.map((p) => [
+        p.nombres,
+        NOMBRE_CARGO[p.cargo],
+        ...datos.dias.map((f) => {
+          const a = datos.celdas.get(clave(p.id, f));
+          return a?.estado === 'ACTIVA' ? a.codigo : a?.estado === 'LIBERADA' ? `${a.codigo} (libre)` : '';
+        }),
+      ]),
+    ]);
+
   return (
     <>
       <Tarjeta
@@ -299,6 +315,9 @@ function Grilla({ id, alCambiarLista, alDescartar }: { id: string; alCambiarList
             <span className={`pill ${numAdvertencias ? 'rojo' : 'verde'}`}>
               {numAdvertencias ? `${numAdvertencias} ${numAdvertencias === 1 ? 'turno' : 'turnos'} con advertencia` : 'Sin advertencias'}
             </span>
+            <button onClick={exportar} title="Descarga el cuadro para abrirlo en Excel">
+              Exportar a Excel
+            </button>
             {cuadro.versiones.length > 0 && (
               <button className={historial ? 'activo' : ''} onClick={() => setHistorial(!historial)}>
                 Historial ({cuadro.versiones.length})

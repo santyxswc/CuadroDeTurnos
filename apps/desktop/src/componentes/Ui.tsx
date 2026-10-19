@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import type { TipoTurnoDto } from '@sgt/shared-types';
-import { tipoTurno } from '../datos/mock';
 
 export function Tarjeta({ titulo, acciones, children, className = '' }: { titulo?: ReactNode; acciones?: ReactNode; children: ReactNode; className?: string }) {
   return (
@@ -16,9 +15,9 @@ export function Tarjeta({ titulo, acciones, children, className = '' }: { titulo
   );
 }
 
-/** Turno de un tipo dado; sin `tipo` usa el catálogo del prototipo (pantallas que aún no usan la API). */
+/** Turno con el color de su tipo; sin `tipo` se muestra en gris. */
 export function Chip({ codigo, tachado, tipo }: { codigo: string; tachado?: boolean; tipo?: Pick<TipoTurnoDto, 'nombre' | 'color' | 'horaInicio' | 'horaFin'> }) {
-  const t = tipo ?? tipoTurno(codigo);
+  const t = tipo;
   return (
     <span className={`chip ${tachado ? 'tachado' : ''}`} style={{ background: t?.color ?? '#8a97a0' }} title={t ? `${t.nombre} ${t.horaInicio}–${t.horaFin}` : codigo}>
       {codigo}

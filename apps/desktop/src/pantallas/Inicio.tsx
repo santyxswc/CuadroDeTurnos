@@ -1,12 +1,12 @@
-// Página principal (RF-MAIN-01 a 06). Marcación, indicadores y cuadro vienen de la API y se actualizan en tiempo real;
-// solo el chat sigue con datos de ejemplo hasta su sprint.
-import { useEffect, useMemo, useState } from 'react';
+// Página principal (RF-MAIN-01 a 06): marcación, indicadores, cuadro de la semana y chat, todo desde la API y en tiempo real.
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   EventoTiempoReal,
   type AsignacionDto,
   type FestivoDto,
   type IndicadorTurnoDto,
   type MarcacionDto,
+  type MensajeChatDto,
   type MiTurnoDto,
   type ParametroDto,
   type SolicitudDto,
@@ -17,8 +17,7 @@ import { api } from '../api/cliente';
 import { useAccion, useDatos } from '../api/useDatos';
 import { useConectado, useTiempoReal } from '../api/tiempoReal';
 import { useSesion } from '../sesion';
-import { useEstado, useUsuario } from '../estado';
-import { persona } from '../datos/mock';
+import { marcarLeido } from '../api/chatLeido';
 import { diaMes, diaSemana, encabezadoDia, fechaLocal, horaLocal, horas, lunesDe, rangoFechas, sumarDias } from '../datos/fechas';
 import { parametro } from '../datos/liquidacion';
 import { saldoVacaciones } from '../datos/vacaciones';
@@ -45,6 +44,7 @@ export function Inicio() {
   const semana = useDatos<AsignacionDto[]>(`/cuadros/asignaciones?desde=${lunes}&hasta=${sumarDias(lunes, 6)}`);
   const proximas = useDatos<AsignacionDto[]>(`/cuadros/asignaciones?desde=${hoy}&hasta=${sumarDias(hoy, 30)}`);
   const personas = useDatos<UsuarioResumenDto[]>('/usuarios');
+  const nombres = useMemo(() => new Map((personas.datos ?? []).map((p) => [p.id, p.nombres])), [personas.datos]);
   const tipos = useDatos<TipoTurnoDto[]>('/tipos-turno?incluirInactivos=true');
   const festivos = useDatos<FestivoDto[]>('/festivos');
 
@@ -142,8 +142,8 @@ export function Inicio() {
         </Tarjeta>
 
         <div className="pila">
-          <Indicadores nombres={new Map((personas.datos ?? []).map((p) => [p.id, p.nombres]))} tipos={tipo} />
-          <Chat />
+          <Indicadores nombres={nombres} tipos={tipo} />
+          <Chat nombres={nombres} />
         </div>
       </div>
     </div>
@@ -281,23 +281,72 @@ function Resumen() {
   );
 }
 
-function Chat() {
-  const usuario = useUsuario();
-  const { mensajes, enviarMensaje } = useEstado();
+/** Chat general del equipo (RF-CHAT-01 a 05): historial, novedades y avisos automáticos del sistema. */
+function Chat({ nombres }: { nombres: Map<string, string> }) {
+  const { usuario } = useSesion();
+  const yo = usuario!;
+  const [mensajes, setMensajes] = useState<MensajeChatDto[]>([]);
+  const [hayMas, setHayMas] = useState(false);
   const [texto, setTexto] = useState('');
   const [novedad, setNovedad] = useState(false);
   const [soloNovedades, setSoloNovedades] = useState(false);
+  const accion = useAccion();
+  const lista = useRef<HTMLDivElement>(null);
+  const alFinal = useRef(true);
+  const POR_PAGINA = 50;
 
-  if (!usuario) return null;
+  const cargar = async (inicial = false) => {
+    const ultimos = await api<MensajeChatDto[]>('GET', `/chat?limite=${POR_PAGINA}`);
+    // Conserva las páginas anteriores que ya se habían cargado.
+    setMensajes((prev) => {
+      const desde = ultimos[0]?.creadoEn ?? '';
+      return [...prev.filter((m) => m.creadoEn < desde), ...ultimos];
+    });
+    if (inicial) setHayMas(ultimos.length === POR_PAGINA);
+  };
+  useEffect(() => {
+    void cargar(true);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  useTiempoReal([EventoTiempoReal.CHAT_ACTUALIZADO], () => {
+    // Vuelve a pedir la última página: así también desaparecen los mensajes borrados u ocultados.
+    void cargar();
+  });
+
+  const anteriores = async () => {
+    const primero = mensajes[0];
+    if (!primero) return;
+    const r = await api<MensajeChatDto[]>('GET', `/chat?limite=${POR_PAGINA}&antes=${encodeURIComponent(primero.creadoEn)}`);
+    alFinal.current = false;
+    setMensajes((prev) => [...r, ...prev]);
+    setHayMas(r.length === POR_PAGINA);
+  };
+
+  // Baja al último mensaje cuando llega uno nuevo y la persona estaba abajo; marca todo como leído.
+  useEffect(() => {
+    const ultimo = mensajes.at(-1);
+    if (ultimo) marcarLeido(yo.id, ultimo.creadoEn);
+    if (alFinal.current && lista.current) lista.current.scrollTop = lista.current.scrollHeight;
+  }, [mensajes, yo.id]);
+
+  const enviar = async () => {
+    if (!texto.trim()) return;
+    alFinal.current = true;
+    const r = await accion.ejecutar(() => api<MensajeChatDto>('POST', '/chat', { contenido: texto, esNovedad: novedad }));
+    if (r) {
+      setTexto('');
+      setNovedad(false);
+    }
+  };
+
+  const minutos = 10;
+  const puedeBorrar = (m: MensajeChatDto) =>
+    yo.rol === 'COORDINADOR' || (m.autorId === yo.id && Date.now() - Date.parse(m.creadoEn) < minutos * 60_000);
   const visibles = soloNovedades ? mensajes.filter((m) => m.esNovedad) : mensajes;
 
   return (
     <Tarjeta
-      titulo={
-        <>
-          Chat del equipo <span className="pill gris">Ejemplo</span>
-        </>
-      }
+      titulo="Chat del equipo"
       className="chat"
       acciones={
         <label className="check">
@@ -305,34 +354,68 @@ function Chat() {
         </label>
       }
     >
-      <div className="mensajes">
+      <div
+        className="mensajes"
+        ref={lista}
+        onScroll={(e) => {
+          const el = e.currentTarget;
+          alFinal.current = el.scrollHeight - el.scrollTop - el.clientHeight < 40;
+        }}
+      >
+        {hayMas && !soloNovedades && (
+          <button className="enlace centrado" onClick={() => void anteriores()}>
+            Ver mensajes anteriores
+          </button>
+        )}
         {visibles.map((m) => (
-          <div key={m.id} className={['mensaje', m.autorId === usuario.id && 'mio', m.esNovedad && 'novedad', !m.autorId && 'sistema'].filter(Boolean).join(' ')}>
+          <div key={m.id} className={['mensaje', m.autorId === yo.id && 'mio', m.esNovedad && 'novedad', !m.autorId && 'sistema'].filter(Boolean).join(' ')}>
             <header>
-              <b>{m.autorId ? persona(m.autorId).nombres : 'Sistema'}</b>
-              <span>{horaLocal(m.hora)}</span>
+              <b>{m.autorId ? (nombres.get(m.autorId) ?? 'Compañero/a') : 'Aviso del sistema'}</b>
+              <span>
+                {diaMes(fechaLocal(new Date(m.creadoEn)))} · {horaLocal(new Date(m.creadoEn))}
+              </span>
               {m.esNovedad && <span className="pill naranja">Novedad</span>}
+              {puedeBorrar(m) && (
+                <button
+                  className="enlace borrar"
+                  title={yo.rol === 'COORDINADOR' && m.autorId !== yo.id ? 'Ocultar el mensaje (queda registrado)' : 'Borrar mi mensaje'}
+                  onClick={() => void accion.ejecutar(() => api('DELETE', `/chat/${m.id}`))}
+                >
+                  {m.autorId === yo.id ? 'Borrar' : 'Ocultar'}
+                </button>
+              )}
             </header>
             {m.contenido}
           </div>
         ))}
+        {visibles.length === 0 && <p className="vacio">{soloNovedades ? 'No hay novedades.' : 'Todavía no hay mensajes. ¡Escribe el primero!'}</p>}
       </div>
       <form
         onSubmit={(e) => {
           e.preventDefault();
-          if (!texto.trim()) return;
-          enviarMensaje(texto.trim(), novedad);
-          setTexto('');
-          setNovedad(false);
+          void enviar();
         }}
       >
-        <textarea rows={2} placeholder="Escribe un mensaje para el equipo…" value={texto} onChange={(e) => setTexto(e.target.value)} />
+        <textarea
+          rows={2}
+          maxLength={1000}
+          placeholder="Escribe un mensaje para el equipo… (Enter envía, Shift+Enter cambia de línea)"
+          value={texto}
+          onChange={(e) => setTexto(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              void enviar();
+            }
+          }}
+        />
+        {accion.error && <div className="error-linea">{accion.error}</div>}
         <div className="fila">
-          <label className="check">
+          <label className="check" title="Las novedades se resaltan y se pueden filtrar">
             <input type="checkbox" checked={novedad} onChange={(e) => setNovedad(e.target.checked)} /> Marcar como novedad
           </label>
           <span className="espaciador" />
-          <button className="primario" type="submit">
+          <button className="primario" type="submit" disabled={!texto.trim() || accion.ocupado}>
             Enviar
           </button>
         </div>

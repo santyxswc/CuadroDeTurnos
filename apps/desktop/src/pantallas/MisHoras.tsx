@@ -1,11 +1,14 @@
-// Horas y recargos con datos reales (Sprint 3): turnos publicados y marcaciones de la API, calculados con el motor de reglas.
+// Horas y recargos con datos reales: turnos publicados y marcaciones de la API, calculados con el motor de reglas.
+// El coordinador puede corregir una marcación (con motivo, queda auditada) y cualquiera exporta el detalle a Excel.
 import { useState } from 'react';
 import { factores, valorizarRecargos, type HorasClasificadas } from '@sgt/rules-engine';
 import { NOMBRE_CARGO, type AsignacionDto, type FestivoDto, type MarcacionDto, type ParametroDto, type TipoTurnoDto, type UsuarioDto } from '@sgt/shared-types';
-import { useDatos } from '../api/useDatos';
+import { api } from '../api/cliente';
+import { useAccion, useDatos } from '../api/useDatos';
 import { useSesion } from '../sesion';
 import { diaMes, fechaLocal, finDeMes, horaLocal, horas, pesos } from '../datos/fechas';
-import { clasificar, filasHoras, parametro, porcentajes, type Fuente } from '../datos/liquidacion';
+import { clasificar, filasHoras, parametro, porcentajes, type FilaHoras, type Fuente } from '../datos/liquidacion';
+import { descargarCsv } from '../datos/exportar';
 import { Chip, Dato, Tarjeta } from '../componentes/Ui';
 
 const CONCEPTOS: Record<keyof HorasClasificadas, string> = {
@@ -58,6 +61,19 @@ export function MisHoras() {
   const valor = valorizarRecargos(clasificadas, salario, divisor, pct);
   const f = factores(pct);
   const tipo = (id: string) => tipos.datos?.find((t) => t.id === id);
+  const marca = (asignacionId: string, t: 'ENTRADA' | 'SALIDA') => (marcaciones.datos ?? []).find((m) => m.asignacionId === asignacionId && m.tipo === t)?.hora;
+  const [corrigiendo, setCorrigiendo] = useState<FilaHoras | null>(null);
+
+  const exportar = () =>
+    descargarCsv(`horas-${(p?.nombres ?? 'persona').replace(/s+/g, '-')}-${mes}`, [
+      ['Fecha', 'Turno', 'Inicio', 'Fin', 'Entrada marcada', 'Salida marcada', 'Diurnas', 'Nocturnas', 'Dom. diurnas', 'Dom. nocturnas', 'Extra'],
+      ...filas.map((x) => {
+        const e = marca(x.a.id, 'ENTRADA');
+        const s = marca(x.a.id, 'SALIDA');
+        return [x.a.fecha, x.a.codigo, horaLocal(x.inicio), horaLocal(x.fin), e && horaLocal(new Date(e)), s && horaLocal(new Date(s)), x.diurnas, x.nocturnas, x.dominicalesDiurnas, x.dominicalesNocturnas, x.extra];
+      }),
+      ['Total', '', '', '', '', '', suma('diurnas'), suma('nocturnas'), suma('dominicalesDiurnas'), suma('dominicalesNocturnas'), suma('extra')],
+    ]);
 
   return (
     <div className="pila">
@@ -102,7 +118,18 @@ export function MisHoras() {
       </div>
 
       <div className="columnas horas">
-        <Tarjeta titulo="Detalle por turno">
+        <Tarjeta titulo="Detalle por turno" acciones={<button onClick={exportar} disabled={!filas.length}>Exportar a Excel</button>}>
+          {corrigiendo && (
+            <Correccion
+              fila={corrigiendo}
+              entrada={marca(corrigiendo.a.id, 'ENTRADA')}
+              salida={marca(corrigiendo.a.id, 'SALIDA')}
+              alTerminar={(ok) => {
+                setCorrigiendo(null);
+                if (ok) void marcaciones.recargar();
+              }}
+            />
+          )}
           <div className="desplazable alto">
             <table className="nowrap">
               <thead>
@@ -115,6 +142,7 @@ export function MisHoras() {
                   <th className="num">Dom. diurnas</th>
                   <th className="num">Dom. nocturnas</th>
                   <th className="num">Extra</th>
+                  <th>Marcado</th>
                 </tr>
               </thead>
               <tbody>
@@ -132,11 +160,19 @@ export function MisHoras() {
                     <td className="num">{horas(x.dominicalesDiurnas)}</td>
                     <td className="num">{horas(x.dominicalesNocturnas)}</td>
                     <td className="num">{x.extra ? horas(x.extra) : ''}</td>
+                    <td>
+                      <Marcado entrada={marca(x.a.id, 'ENTRADA')} salida={marca(x.a.id, 'SALIDA')} />
+                      {esCoordinador && (
+                        <button className="enlace" onClick={() => setCorrigiendo(x)}>
+                          Corregir
+                        </button>
+                      )}
+                    </td>
                   </tr>
                 ))}
                 {filas.length === 0 && (
                   <tr>
-                    <td colSpan={8} className="vacio">
+                    <td colSpan={9} className="vacio">
                       {fuente === 'reales' ? 'No hay turnos con entrada y salida marcadas en este mes.' : 'No hay turnos publicados en este mes.'}
                     </td>
                   </tr>
@@ -185,6 +221,70 @@ export function MisHoras() {
             Es un valor estimado de recargos; la liquidación oficial la hace nómina. Recargo dominical vigente: {pct.dominicalPct} %.
           </div>
         </Tarjeta>
+      </div>
+    </div>
+  );
+}
+
+function Marcado({ entrada, salida }: { entrada?: string; salida?: string }) {
+  if (!entrada && !salida) return <small className="vacio">Sin marcar </small>;
+  return <small>{entrada ? horaLocal(new Date(entrada)) : '—'}–{salida ? horaLocal(new Date(salida)) : '—'} </small>;
+}
+
+/** El coordinador registra la hora correcta de entrada o salida; el motivo es obligatorio y queda en la auditoría. */
+function Correccion({ fila, entrada, salida, alTerminar }: { fila: FilaHoras; entrada?: string; salida?: string; alTerminar: (ok: boolean) => void }) {
+  const [tipo, setTipo] = useState<'ENTRADA' | 'SALIDA'>(entrada ? 'SALIDA' : 'ENTRADA');
+  const local = (d: Date) => `${fechaLocal(d)}T${horaLocal(d)}`;
+  const [hora, setHora] = useState(local(tipo === 'ENTRADA' ? fila.inicio : fila.fin));
+  const [motivo, setMotivo] = useState('');
+  const accion = useAccion();
+
+  const guardar = async () => {
+    const r = await accion.ejecutar(() =>
+      api('POST', '/marcaciones/correcciones', { usuarioId: fila.a.usuarioId, asignacionId: fila.a.id, tipo, hora: new Date(`${hora}:00-05:00`).toISOString(), motivo }),
+    );
+    if (r !== undefined) alTerminar(true);
+  };
+
+  return (
+    <div className="alerta-caja info pila compacta">
+      <b>
+        Corregir marcación del turno {fila.a.codigo} del {diaMes(fila.a.fecha)}
+      </b>
+      <small>
+        Marcado ahora: <Marcado entrada={entrada} salida={salida} />
+      </small>
+      <div className="fila">
+        <label>
+          Qué corriges
+          <select
+            value={tipo}
+            onChange={(e) => {
+              const t = e.target.value as 'ENTRADA' | 'SALIDA';
+              setTipo(t);
+              setHora(local(t === 'ENTRADA' ? fila.inicio : fila.fin));
+            }}
+          >
+            <option value="ENTRADA">Entrada</option>
+            <option value="SALIDA">Salida</option>
+          </select>
+        </label>
+        <label>
+          Hora correcta
+          <input type="datetime-local" value={hora} onChange={(e) => setHora(e.target.value)} />
+        </label>
+        <label style={{ flex: 2 }}>
+          Motivo
+          <input value={motivo} maxLength={300} placeholder="Ej.: olvidó marcar al llegar" onChange={(e) => setMotivo(e.target.value)} />
+        </label>
+      </div>
+      {accion.error && <div className="error-linea">{accion.error}</div>}
+      <div className="fila">
+        <span className="espaciador" />
+        <button onClick={() => alTerminar(false)}>Cancelar</button>
+        <button className="primario" disabled={motivo.trim().length < 5 || !hora || accion.ocupado} onClick={() => void guardar()}>
+          Guardar corrección
+        </button>
       </div>
     </div>
   );
