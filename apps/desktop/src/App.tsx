@@ -1,7 +1,9 @@
 import { useEffect, useState } from 'react';
-import { NOMBRE_CARGO } from '@sgt/shared-types';
+import { EventoTiempoReal, NOMBRE_CARGO, type SolicitudDto } from '@sgt/shared-types';
 import { useEstado, useUsuario } from './estado';
 import { useSesion } from './sesion';
+import { useDatos } from './api/useDatos';
+import { useTiempoReal } from './api/tiempoReal';
 import { idPrototipo } from './datos/mock';
 import { CambiarPassword } from './pantallas/CambiarPassword';
 import { AHORA } from './datos/mock';
@@ -30,7 +32,7 @@ const MENU: { ruta: Ruta; texto: string; soloCoordinador?: boolean }[] = [
 ];
 
 /** Pantallas que ya trabajan con la API; las demás muestran el aviso de datos de ejemplo. */
-const CONECTADAS: Ruta[] = ['inicio', 'editor', 'horas', 'pacientes', 'admin'];
+const CONECTADAS: Ruta[] = ['inicio', 'editor', 'solicitudes', 'horas', 'pacientes', 'admin'];
 
 export function App() {
   const sesion = useSesion();
@@ -51,16 +53,16 @@ export function App() {
 function Aplicacion() {
   const { usuario: real, cerrar } = useSesion();
   const usuario = useUsuario();
-  const { solicitudes } = useEstado();
+  const solicitudes = useDatos<SolicitudDto[]>('/solicitudes');
+  useTiempoReal([EventoTiempoReal.SOLICITUD_ACTUALIZADA], () => void solicitudes.recargar());
   const [ruta, setRuta] = useState<Ruta>('inicio');
 
   if (!usuario || !real) return null;
 
   const esCoordinador = real.rol === 'COORDINADOR';
-  const pendientes = solicitudes.filter((s) =>
-    esCoordinador
-      ? s.estado === 'PENDIENTE_COORDINADOR'
-      : s.estado === 'PENDIENTE_COMPANERO' && s.companeroId === usuario.id,
+  // Lo que espera una respuesta de esta persona.
+  const pendientes = (solicitudes.datos ?? []).filter((s) =>
+    esCoordinador ? s.estado === 'PENDIENTE_COORDINADOR' : s.estado === 'PENDIENTE_COMPANERO' && s.companeroId === real.id,
   ).length;
 
   const pantalla = {

@@ -8,6 +8,7 @@ import {
   type IndicadorTurnoDto,
   type MarcacionDto,
   type MiTurnoDto,
+  type SolicitudDto,
   type TipoTurnoDto,
   type UsuarioResumenDto,
 } from '@sgt/shared-types';
@@ -253,16 +254,19 @@ function Indicadores({ nombres, tipos }: { nombres: Map<string, string>; tipos: 
   );
 }
 
-/** Saldo de vacaciones y solicitudes: datos de ejemplo hasta el Sprint 4. */
+/** Solicitudes pendientes (reales) y saldo de vacaciones (todavía de ejemplo). */
 function ResumenEjemplo() {
+  const { usuario: yo } = useSesion();
   const usuario = useUsuario();
   const { solicitudes } = useEstado();
+  const reales = useDatos<SolicitudDto[]>('/solicitudes');
+  useTiempoReal([EventoTiempoReal.SOLICITUD_ACTUALIZADA], () => void reales.recargar());
   if (!usuario) return null;
-  const pendientes = solicitudes.filter((s) => s.solicitanteId === usuario.id && s.estado.startsWith('PENDIENTE')).length;
+  const pendientes = (reales.datos ?? []).filter((s) => s.solicitanteId === yo!.id && s.estado.startsWith('PENDIENTE')).length;
   return (
     <>
       <Dato etiqueta="Saldo de vacaciones" valor={`${saldoVacaciones(usuario, solicitudes).disponibles} días`} nota="Dato de ejemplo" />
-      <Dato etiqueta="Mis solicitudes pendientes" valor={pendientes} nota="Dato de ejemplo" />
+      <Dato etiqueta="Mis solicitudes pendientes" valor={pendientes} nota="Ver detalle en Solicitudes" />
     </>
   );
 }

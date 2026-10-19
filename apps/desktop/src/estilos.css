@@ -256,3 +256,4 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .fila.cantidad { align-items: center; flex-wrap: nowrap; }
 .fila.cantidad input { width: 80px; }
 .error-linea { color: var(--rojo); font-size: 12px; }
+.pila.compacta { gap: 6px; }
