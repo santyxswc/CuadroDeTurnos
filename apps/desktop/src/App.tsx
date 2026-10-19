@@ -29,6 +29,9 @@ const MENU: { ruta: Ruta; texto: string; soloCoordinador?: boolean }[] = [
   { ruta: 'admin', texto: 'Administración', soloCoordinador: true },
 ];
 
+/** Pantallas que ya trabajan con la API; las demás muestran el aviso de datos de ejemplo. */
+const CONECTADAS: Ruta[] = ['inicio', 'editor', 'admin'];
+
 export function App() {
   const sesion = useSesion();
   const { iniciarSesion, cerrarSesion } = useEstado();
@@ -99,7 +102,7 @@ function Aplicacion() {
         </div>
       </aside>
       <main className="contenido">
-        {ruta !== 'admin' && (
+        {!CONECTADAS.includes(ruta) && (
           <div className="aviso-prototipo">
             Pantalla de ejemplo (se conecta a la API en los próximos sprints) · se muestra como {usuario.nombres} · hora simulada: {fechaLarga(AHORA)}, {horaLocal(AHORA)}
           </div>

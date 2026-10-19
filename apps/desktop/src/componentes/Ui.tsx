@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import type { TipoTurnoDto } from '@sgt/shared-types';
 import { tipoTurno } from '../datos/mock';
 
 export function Tarjeta({ titulo, acciones, children, className = '' }: { titulo?: ReactNode; acciones?: ReactNode; children: ReactNode; className?: string }) {
@@ -15,10 +16,11 @@ export function Tarjeta({ titulo, acciones, children, className = '' }: { titulo
   );
 }
 
-export function Chip({ codigo, tachado }: { codigo: string; tachado?: boolean }) {
-  const t = tipoTurno(codigo);
+/** Turno de un tipo dado; sin `tipo` usa el catálogo del prototipo (pantallas que aún no usan la API). */
+export function Chip({ codigo, tachado, tipo }: { codigo: string; tachado?: boolean; tipo?: Pick<TipoTurnoDto, 'nombre' | 'color' | 'horaInicio' | 'horaFin'> }) {
+  const t = tipo ?? tipoTurno(codigo);
   return (
-    <span className={`chip ${tachado ? 'tachado' : ''}`} style={{ background: t.color }} title={`${t.nombre} ${t.horaInicio}–${t.horaFin}`}>
+    <span className={`chip ${tachado ? 'tachado' : ''}`} style={{ background: t?.color ?? '#8a97a0' }} title={t ? `${t.nombre} ${t.horaInicio}–${t.horaFin}` : codigo}>
       {codigo}
     </span>
   );
@@ -43,6 +45,7 @@ const ETIQUETAS: Record<string, [string, string]> = {
   APTO_CON_ADVERTENCIA: ['Apto con advertencia', 'amarillo'],
   NO_APTO: ['No apto', 'rojo'],
   PUBLICADO: ['Publicado', 'verde'],
+  CERRADO: ['Cerrado', 'azul'],
 };
 
 export function Estado({ valor }: { valor: string }) {

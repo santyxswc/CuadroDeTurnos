@@ -41,3 +41,14 @@ export const pesos = (n: number) =>
   new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', maximumFractionDigits: 0 }).format(n);
 
 export const horas = (n: number) => (Math.round(n * 10) / 10).toLocaleString('es-CO');
+
+const fmtFechaHora = new Intl.DateTimeFormat('es-CO', { timeZone: ZONA_HORARIA, day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+
+/** "19 oct, 14:05" en hora de Bogotá, para fechas ISO que vienen de la API. */
+export const fechaHora = (iso: string) => fmtFechaHora.format(new Date(iso));
+
+/** Último día del mes de la fecha. */
+export const finDeMes = (fecha: string) => {
+  const [a, m] = fecha.split('-').map(Number);
+  return new Date(Date.UTC(a, m, 0)).toISOString().slice(0, 10);
+};

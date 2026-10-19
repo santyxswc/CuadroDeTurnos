@@ -33,6 +33,9 @@ export function alExpirarSesion(fn: (motivo: string) => void) {
 
 export const edadTokenMs = () => (tokens ? Date.now() - tokens.obtenidoEn : 0);
 
+/** Token vigente, para autenticar la conexión de tiempo real. */
+export const tokenAcceso = () => tokens?.acceso ?? null;
+
 async function leerError(r: Response): Promise<ErrorApi> {
   try {
     const cuerpo = (await r.json()) as { message?: string | string[]; codigo?: string };
