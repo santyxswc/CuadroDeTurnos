@@ -26,9 +26,22 @@ packages/
 docs/             Plan técnico, decisiones, bitácora y documentos del cliente
 ```
 
-## Cómo ejecutar
+## Cómo abrir la aplicación (forma fácil)
 
-Requisitos: Node.js 22 o superior. No se necesita base de datos ni Docker.
+1. Instala [Node.js](https://nodejs.org) (versión 22 o superior). No se necesita base de datos.
+2. Abre una terminal en esta carpeta y escribe, solo la primera vez:
+   ```bash
+   npm install
+   ```
+3. Cada vez que quieras usar la app:
+   ```bash
+   npm run iniciar
+   ```
+   Se abre sola en el navegador (http://localhost:5173). Para cerrarla: `Ctrl + C` en la terminal.
+
+Usuarios de ejemplo (contraseña `Demo2026`): coordinadora **52123456** (Laura Méndez) y enfermero **80234567** (Andrés Rojas).
+
+## Cómo ejecutar por partes (desarrollo)
 
 ```bash
 npm install
