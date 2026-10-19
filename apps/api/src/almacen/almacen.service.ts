@@ -3,8 +3,10 @@ import { join } from 'node:path';
 import { CONFIG, type ConfigSgt } from '../config';
 import { ColeccionJson, RegistroJsonl } from './archivo-json';
 import type {
+  CuadroGuardado,
   EventoAuditoria,
   FestivoGuardado,
+  MarcacionGuardada,
   ParametroGuardado,
   SesionGuardada,
   TipoTurnoGuardado,
@@ -21,6 +23,8 @@ export class AlmacenService implements OnModuleInit {
   readonly tiposTurno: ColeccionJson<TipoTurnoGuardado>;
   readonly parametros: ColeccionJson<ParametroGuardado>;
   readonly festivos: ColeccionJson<FestivoGuardado>;
+  readonly cuadros: ColeccionJson<CuadroGuardado>;
+  readonly marcaciones: ColeccionJson<MarcacionGuardada>;
   readonly auditoria: RegistroJsonl<EventoAuditoria>;
 
   constructor(@Inject(CONFIG) private readonly config: ConfigSgt) {
@@ -30,11 +34,13 @@ export class AlmacenService implements OnModuleInit {
     this.tiposTurno = new ColeccionJson(ruta('tipos-turno.json'));
     this.parametros = new ColeccionJson(ruta('parametros.json'));
     this.festivos = new ColeccionJson(ruta('festivos.json'));
+    this.cuadros = new ColeccionJson(ruta('cuadros.json'));
+    this.marcaciones = new ColeccionJson(ruta('marcaciones.json'));
     this.auditoria = new RegistroJsonl(ruta('auditoria.jsonl'));
   }
 
   async onModuleInit() {
-    await Promise.all([this.usuarios, this.sesiones, this.tiposTurno, this.parametros, this.festivos].map((c) => c.cargar()));
+    await Promise.all([this.usuarios, this.sesiones, this.tiposTurno, this.parametros, this.festivos, this.cuadros, this.marcaciones].map((c) => c.cargar()));
     this.logger.log(`Datos cargados desde ${this.config.directorioDatos}`);
     await sembrar(this, this.config, this.logger);
   }

@@ -7,6 +7,7 @@ import type { SesionGuardada, UsuarioGuardado } from '../almacen/modelos';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { CONFIG, type ConfigSgt } from '../config';
 import { ParametrosService } from '../parametros/parametros.service';
+import { EventosGateway } from '../tiempo-real/eventos.gateway';
 import { aUsuarioDto } from '../usuarios/mapeo';
 import type { CargaToken } from './autenticacion.guard';
 import { cumplePolitica, hashPassword, MENSAJE_POLITICA, sha256, tokenAleatorio, verificarPassword } from './passwords';
@@ -25,6 +26,7 @@ export class AuthService {
     private readonly jwt: JwtService,
     private readonly parametros: ParametrosService,
     private readonly auditoria: AuditoriaService,
+    private readonly eventos: EventosGateway,
     @Inject(CONFIG) private readonly config: ConfigSgt,
   ) {}
 
@@ -90,6 +92,7 @@ export class AuthService {
 
   async cerrarSesion(sesionId: string, usuarioId: string) {
     await this.almacen.sesiones.actualizar(sesionId, (s) => ({ ...s, revocadaEn: new Date().toISOString() }));
+    this.eventos.cerrarSesion(sesionId);
     await this.auditoria.registrar({ actorId: usuarioId, accion: 'LOGOUT', entidad: 'sesion', entidadId: sesionId });
   }
 
@@ -110,6 +113,7 @@ export class AuthService {
     const ahora = new Date().toISOString();
     for (const s of this.almacen.sesiones.filtrar((x) => x.usuarioId === usuarioId && !x.revocadaEn && x.id !== excepto)) {
       await this.almacen.sesiones.actualizar(s.id, (x) => ({ ...x, revocadaEn: ahora }));
+      this.eventos.cerrarSesion(s.id);
     }
   }
 
