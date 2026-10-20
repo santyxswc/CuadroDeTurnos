@@ -1,0 +1,734 @@
+<!doctype html>
+<!--
+  Guía de usuario de TurnoCare. Fuente del PDF docs/Guia_de_Usuario_TurnoCare.pdf.
+  Para regenerarlo (con capturas nuevas): npm run guia:pdf
+  Autor: Santiago Caicedo
+-->
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <title>TurnoCare · Guía de usuario</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 16mm 16mm 18mm;
+      }
+      :root {
+        --primario: #0f7c80;
+        --oscuro: #0f3d45;
+        --texto: #1d2b33;
+        --suave: #5b6b74;
+        --borde: #dbe3e7;
+        --fondo: #f2f6f8;
+        --naranja: #e8742b;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font: 10.5pt/1.5 'Segoe UI', system-ui, sans-serif;
+        color: var(--texto);
+        background: #fff;
+      }
+      h1,
+      h2,
+      h3 {
+        color: var(--oscuro);
+        line-height: 1.2;
+      }
+      h2 {
+        font-size: 20pt;
+        margin: 0 0 4mm;
+        padding-bottom: 2mm;
+        border-bottom: 2px solid var(--primario);
+        break-before: page;
+      }
+      h3 {
+        font-size: 12.5pt;
+        margin: 6mm 0 2mm;
+        break-after: avoid;
+      }
+      p {
+        margin: 0 0 2.5mm;
+      }
+      ol,
+      ul {
+        margin: 0 0 3mm;
+        padding-left: 6mm;
+      }
+      li {
+        margin-bottom: 1mm;
+      }
+      b {
+        color: var(--oscuro);
+      }
+      kbd {
+        font: 9pt Consolas, monospace;
+        background: var(--fondo);
+        border: 1px solid var(--borde);
+        border-radius: 3px;
+        padding: 0 4px;
+      }
+      code {
+        font: 9pt Consolas, monospace;
+        background: var(--fondo);
+        padding: 0 3px;
+        border-radius: 3px;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 2mm 0 4mm;
+        font-size: 9.5pt;
+        break-inside: avoid;
+      }
+      th,
+      td {
+        text-align: left;
+        padding: 1.6mm 2.5mm;
+        border-bottom: 1px solid var(--borde);
+        vertical-align: top;
+      }
+      th {
+        background: var(--fondo);
+        color: var(--oscuro);
+      }
+      figure {
+        margin: 3mm 0 5mm;
+        break-inside: avoid;
+      }
+      figure img {
+        width: 100%;
+        border: 1px solid var(--borde);
+        border-radius: 6px;
+        box-shadow: 0 1mm 3mm rgba(15, 61, 69, 0.12);
+      }
+      figure.pequena img {
+        width: 70%;
+        display: block;
+        margin: 0 auto;
+      }
+      figcaption {
+        font-size: 8.5pt;
+        color: var(--suave);
+        margin-top: 1.5mm;
+        text-align: center;
+      }
+      .nota {
+        background: #fff6ec;
+        border-left: 3px solid var(--naranja);
+        padding: 2.5mm 4mm;
+        border-radius: 0 4px 4px 0;
+        margin: 3mm 0;
+        break-inside: avoid;
+      }
+      .consejo {
+        background: #e9f5f5;
+        border-left: 3px solid var(--primario);
+        padding: 2.5mm 4mm;
+        border-radius: 0 4px 4px 0;
+        margin: 3mm 0;
+        break-inside: avoid;
+      }
+      .estado {
+        display: inline-block;
+        padding: 0 2.5mm;
+        border-radius: 99px;
+        font-size: 8.5pt;
+        font-weight: 600;
+        white-space: nowrap;
+      }
+      .verde {
+        background: #dff3e6;
+        color: #1f7a45;
+      }
+      .ambar {
+        background: #fdf0d2;
+        color: #8a5a00;
+      }
+      .rojo {
+        background: #fde3e3;
+        color: #b42323;
+      }
+      .gris {
+        background: #e8edf0;
+        color: #4a5a63;
+      }
+
+      /* Portada */
+      .portada {
+        height: 263mm;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 18mm 6mm 6mm;
+      }
+      .portada img {
+        width: 30mm;
+        height: 30mm;
+      }
+      .portada h1 {
+        font-size: 40pt;
+        margin: 8mm 0 0;
+        font-weight: 600;
+      }
+      .portada h1 span {
+        color: var(--primario);
+      }
+      .portada .sub {
+        font-size: 16pt;
+        color: var(--suave);
+        margin-top: 2mm;
+      }
+      .portada .frase {
+        font-size: 12pt;
+        max-width: 135mm;
+        margin-top: 12mm;
+      }
+      .portada .datos {
+        border-top: 2px solid var(--primario);
+        padding-top: 4mm;
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2mm 8mm;
+        font-size: 10pt;
+      }
+      .portada .datos small {
+        display: block;
+        color: var(--suave);
+        font-size: 8.5pt;
+      }
+
+      /* Índice */
+      .indice {
+        list-style: none;
+        padding: 0;
+        font-size: 11.5pt;
+      }
+      .indice li {
+        padding: 2.2mm 0;
+        border-bottom: 1px dotted var(--borde);
+      }
+      .indice li span {
+        color: var(--primario);
+        font-weight: 700;
+        display: inline-block;
+        width: 9mm;
+      }
+      .indice small {
+        display: block;
+        color: var(--suave);
+        margin-left: 9mm;
+        font-size: 9pt;
+      }
+      .pasos-grandes {
+        counter-reset: paso;
+        list-style: none;
+        padding: 0;
+      }
+      .pasos-grandes li {
+        counter-increment: paso;
+        position: relative;
+        padding: 0 0 3mm 11mm;
+      }
+      .pasos-grandes li::before {
+        content: counter(paso);
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 7mm;
+        height: 7mm;
+        border-radius: 50%;
+        background: var(--primario);
+        color: #fff;
+        font-weight: 700;
+        display: grid;
+        place-items: center;
+        font-size: 9.5pt;
+      }
+      .dos {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6mm;
+      }
+    </style>
+  </head>
+  <body>
+    <!-- Portada -->
+    <section class="portada">
+      <div>
+        <img src="../../apps/desktop/build/icono.png" alt="" />
+        <h1>Turno<span>Care</span></h1>
+        <div class="sub">Guía de usuario</div>
+        <p class="frase">
+          Todo lo que necesitas para manejar el cuadro de turnos de enfermería: marcar tu entrada y salida, pedir cambios, permisos y vacaciones, revisar tus horas y
+          hablar con tu equipo.
+        </p>
+      </div>
+      <div class="datos">
+        <div><small>Autor</small>Santiago Caicedo</div>
+        <div><small>Versión de la aplicación</small>0.1.0</div>
+        <div><small>Para</small>Enfermeros/as y coordinadores/as</div>
+        <div><small>Fecha</small>Octubre de 2026</div>
+      </div>
+    </section>
+
+    <!-- Índice -->
+    <h2>Contenido</h2>
+    <ol class="indice">
+      <li><span>1</span>Instalar y abrir TurnoCare<small>Descarga, instalación y primer ingreso</small></li>
+      <li><span>2</span>Conoce la pantalla<small>El menú, los avisos y la página principal</small></li>
+      <li><span>3</span>Guía para enfermeros/as<small>Marcar, ver turnos, solicitudes, vacaciones, horas, pacientes y chat</small></li>
+      <li><span>4</span>Guía para coordinadores/as<small>Personal, cuadro de turnos, aprobaciones, coberturas y correcciones</small></li>
+      <li><span>5</span>Qué significa cada estado<small>Turnos, solicitudes, cuadro y filtro de aptos</small></li>
+      <li><span>6</span>Preguntas frecuentes<small>Problemas comunes y cómo resolverlos</small></li>
+    </ol>
+    <div class="consejo">
+      Esta misma guía está dentro de la aplicación, en el menú <b>Ayuda</b>, con un botón para abrir cada pantalla.
+    </div>
+
+    <!-- 1 -->
+    <h2>1. Instalar y abrir TurnoCare</h2>
+    <h3>Instalación (una sola vez)</h3>
+    <ol class="pasos-grandes">
+      <li>
+        Descarga <b>TurnoCare-Instalador-0.1.0.exe</b> desde la página de descargas del proyecto:<br />
+        <code>github.com/santyxswc/CuadroDeTurnos/releases</code>
+      </li>
+      <li>Haz <b>doble clic</b> en el archivo. No hay que elegir nada: se instala solo en unos segundos.</li>
+      <li>Al terminar, TurnoCare se abre sola y deja un ícono <b>TurnoCare</b> en el escritorio y en el menú Inicio. Las siguientes veces ábrela desde ese ícono.</li>
+    </ol>
+    <div class="nota">
+      <b>Si Windows muestra «Windows protegió su PC»</b>, pulsa <b>Más información</b> y luego <b>Ejecutar de todas formas</b>. Aparece porque el instalador no tiene firma
+      digital (es un proyecto académico); no es un virus.
+    </div>
+    <p>
+      No necesitas internet, ni instalar nada más. Funciona en Windows 10 y 11 de 64 bits. Lo normal es instalarla en el computador de la estación de enfermería,
+      donde todo el equipo entra con su propio usuario.
+    </p>
+
+    <h3>Entrar por primera vez</h3>
+    <figure class="pequena">
+      <img src="img/01-ingreso.png" alt="Pantalla de ingreso" />
+      <figcaption>Pantalla de ingreso. «¿Primera vez?» llena los datos de un usuario de ejemplo.</figcaption>
+    </figure>
+    <ol>
+      <li>Escribe tu <b>número de documento</b> y la <b>contraseña</b> que te entregó el coordinador, y pulsa <b>Ingresar</b>.</li>
+      <li>La primera vez la app te pide <b>cambiar la contraseña</b> por una tuya: mínimo 8 caracteres, con letras y números.</li>
+      <li>Si dejas la app sin usar <b>15 minutos</b>, la sesión se cierra sola para proteger tus datos.</li>
+    </ol>
+    <div class="consejo">
+      <b>¿Solo quieres probarla?</b> La app viene con un equipo de ejemplo. Pulsa <b>¿Primera vez?</b> y elige un usuario (contraseña <code>Demo2026</code>):
+      coordinadora <b>52123456</b> (Laura Méndez) o enfermero <b>80234567</b> (Andrés Rojas).
+    </div>
+
+    <!-- 2 -->
+    <h2>2. Conoce la pantalla</h2>
+    <figure>
+      <img src="img/02-inicio-enfermero.png" alt="Página principal" />
+      <figcaption>Página principal de un enfermero en turno.</figcaption>
+    </figure>
+    <div class="dos">
+      <div>
+        <h3>El menú de la izquierda</h3>
+        <p>Desde aquí te mueves por toda la app. Abajo ves tu nombre, tu cargo y el botón <b>Salir</b>.</p>
+        <p>Los <b>números naranjas</b> te avisan de lo que espera tu atención: solicitudes por responder o mensajes nuevos en el chat.</p>
+        <h3>Los avisos</h3>
+        <p>
+          Cuando llega algo importante (una solicitud nueva, una novedad del chat) aparece un <b>aviso abajo a la derecha</b>. Púlsalo para ir a esa pantalla; si no,
+          desaparece solo.
+        </p>
+      </div>
+      <div>
+        <h3>La página principal</h3>
+        <ul>
+          <li><b>Arriba:</b> tu turno actual y el botón para marcar entrada o salida.</li>
+          <li><b>Tarjetas:</b> próximo turno, horas de la semana, saldo de vacaciones y solicitudes pendientes.</li>
+          <li><b>Cuadro de la semana:</b> los turnos de todo el equipo. Usa <kbd>‹</kbd> <kbd>›</kbd> para cambiar de semana y <b>Hoy</b> para volver.</li>
+          <li><b>Estado del turno actual:</b> quién está trabajando, en vivo.</li>
+          <li><b>Chat del equipo:</b> mensajes y novedades.</li>
+        </ul>
+      </div>
+    </div>
+    <h3>Lo que hace cada pantalla</h3>
+    <table>
+      <tr>
+        <th style="width: 30%">Pantalla</th>
+        <th>Para qué sirve</th>
+        <th style="width: 18%">Quién la ve</th>
+      </tr>
+      <tr>
+        <td><b>Página principal</b></td>
+        <td>Marcar entrada y salida, ver el cuadro de la semana, quién está en turno y el chat.</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Editor de cuadro</b></td>
+        <td>Armar el cuadro del período, publicarlo y hacer cambios con motivo.</td>
+        <td>Coordinador/a</td>
+      </tr>
+      <tr>
+        <td><b>Solicitudes</b></td>
+        <td>Pedir intercambios, cesiones, permisos y vacaciones; responder lo que te piden.</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Filtro de aptos</b></td>
+        <td>Ver quién puede tomar un turno sin quedar sobrecargado.</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Horas y recargos</b></td>
+        <td>Horas del mes (diurnas, nocturnas, dominicales, extras) y valor estimado de los recargos.</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Vacaciones</b></td>
+        <td>Saldo de días, simular fechas y pedir vacaciones.</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Pacientes atendidos</b></td>
+        <td>Registrar cuántos pacientes atendiste en cada turno (solo el número).</td>
+        <td>Todos</td>
+      </tr>
+      <tr>
+        <td><b>Administración</b></td>
+        <td>Personal, tipos de turno, parámetros laborales, festivos y auditoría.</td>
+        <td>Coordinador/a</td>
+      </tr>
+      <tr>
+        <td><b>Ayuda</b></td>
+        <td>Esta guía dentro de la app.</td>
+        <td>Todos</td>
+      </tr>
+    </table>
+
+    <!-- 3 -->
+    <h2>3. Guía para enfermeros/as</h2>
+    <h3>Marcar mi entrada y mi salida</h3>
+    <ol>
+      <li>En la <b>Página principal</b>, pulsa <b>Marcar entrada</b> al llegar.</li>
+      <li>Aparece un aviso verde con la hora registrada. Se usa la <b>hora del servidor</b>, no la del computador.</li>
+      <li>Al terminar tu turno, pulsa <b>Marcar salida</b>.</li>
+    </ol>
+    <p>Si pulsas dos veces seguidas no pasa nada: la segunda se ignora. Si olvidaste marcar, avísale al coordinador por el chat para que lo corrija.</p>
+
+    <h3>Ver mis turnos</h3>
+    <ul>
+      <li>El <b>cuadro de la semana</b> está en la Página principal; tu fila aparece resaltada.</li>
+      <li>Tu <b>próximo turno</b> aparece en una tarjeta aparte, con los dos siguientes.</li>
+      <li>Un turno con <b>borde rojo punteado</b> quedó libre (por un permiso o vacaciones) y necesita a alguien que lo cubra.</li>
+    </ul>
+
+    <h3>Solicitudes: cambiar, ceder un turno o pedir un permiso</h3>
+    <figure>
+      <img src="img/03-solicitudes.png" alt="Solicitudes" />
+      <figcaption>Bandeja de solicitudes: una cesión por responder y un permiso esperando al coordinador.</figcaption>
+    </figure>
+    <ol>
+      <li>Ve a <b>Solicitudes → Nueva solicitud</b>.</li>
+      <li>
+        Elige el tipo: <b>Intercambio</b> (cambias tu turno por uno de un compañero), <b>Cesión</b> (le das tu turno), <b>Permiso</b> o <b>Vacaciones</b>.
+      </li>
+      <li>Completa los datos (turno, compañero, días, motivo) y envía.</li>
+      <li>En intercambios y cesiones, tu compañero debe <b>Aceptar</b>. Luego el coordinador <b>aprueba</b>.</li>
+      <li>Al aprobarse, el <b>cuadro cambia solo</b>. No hace falta avisar a nadie más.</li>
+    </ol>
+    <p>
+      Si un compañero te pide un cambio, verás un número naranja en <b>Solicitudes</b>. Abre la <b>Bandeja</b> y pulsa <b>Aceptar</b> o <b>No acepto</b>. Mientras tu
+      solicitud esté pendiente, puedes <b>Cancelar</b>la.
+    </p>
+    <div class="nota">
+      Si la app no te deja ceder un turno, es porque tu compañero quedaría sin el descanso mínimo, con demasiadas horas en la semana o con dos turnos el mismo día.
+      Revisa antes el <b>Filtro de aptos</b>.
+    </div>
+
+    <h3>Filtro de aptos: ¿quién puede tomar un turno?</h3>
+    <figure>
+      <img src="img/04-aptos.png" alt="Filtro de aptos" />
+      <figcaption>Para una fecha y un turno, la app clasifica al equipo en Apto, Apto con advertencia y No apto, con el motivo.</figcaption>
+    </figure>
+    <ol>
+      <li>Elige la <b>fecha</b> y el <b>turno</b>, o pulsa uno de los turnos que <b>requieren cobertura</b>.</li>
+      <li>La app revisa descansos, horas de la semana, noches seguidas, vacaciones y cruces de turnos.</li>
+      <li>Aparece primero quien tiene menos carga. Como enfermero/a ves el motivo, pero no las horas de tus compañeros.</li>
+    </ol>
+
+    <h3>Revisar mis horas y recargos</h3>
+    <figure>
+      <img src="img/05-horas.png" alt="Horas y recargos" />
+      <figcaption>Horas del mes, detalle por turno y valor estimado de los recargos.</figcaption>
+    </figure>
+    <ol>
+      <li>Abre <b>Horas y recargos</b> y elige el <b>mes</b>.</li>
+      <li>
+        En <b>Calcular con</b> elige <i>Turnos programados</i> (según el cuadro) o <i>Horas marcadas</i> (lo que marcaste, que es lo que cuenta para nómina).
+      </li>
+      <li>En el detalle ves cada turno, cuántas horas son diurnas, nocturnas, dominicales o extra, y a qué hora marcaste.</li>
+      <li><b>Exportar a Excel</b> descarga el detalle.</li>
+    </ol>
+    <p>El valor de los recargos es un <b>estimado</b>; el pago oficial lo hace nómina.</p>
+
+    <h3>Pedir vacaciones</h3>
+    <figure>
+      <img src="img/06-vacaciones.png" alt="Vacaciones" />
+      <figcaption>Saldo de días y simulador de fechas.</figcaption>
+    </figure>
+    <ol>
+      <li>Abre <b>Vacaciones</b>. Arriba ves tus <b>días disponibles</b>: 15 días hábiles por cada año trabajado (lunes a sábado, sin festivos).</li>
+      <li>Elige <b>desde</b> y <b>hasta</b>. La app calcula los días hábiles que usas y qué día vuelves a trabajar.</li>
+      <li>Si algo no cuadra (poca anticipación o pocos días disponibles), aparece en rojo y no te deja enviar.</li>
+      <li>Pulsa <b>Pedir vacaciones</b> y sigue el estado en <b>Solicitudes</b>.</li>
+    </ol>
+
+    <h3>Registrar los pacientes que atendí</h3>
+    <figure>
+      <img src="img/07-pacientes.png" alt="Pacientes atendidos" />
+      <figcaption>Solo se guarda el número de pacientes por turno, nunca sus datos.</figcaption>
+    </figure>
+    <ol>
+      <li>Abre <b>Pacientes atendidos</b>.</li>
+      <li>Cuando tu turno ya empezó, escribe el número en la casilla del turno y pulsa <b>Guardar</b>.</li>
+    </ol>
+
+    <h3>Usar el chat del equipo</h3>
+    <ul>
+      <li>Escribe en la caja de abajo y pulsa <kbd>Enter</kbd>. Para cambiar de línea usa <kbd>Shift</kbd> + <kbd>Enter</kbd>.</li>
+      <li>Marca <b>Novedad</b> para avisos importantes: se resaltan en naranja y se pueden filtrar con <b>Solo novedades</b>.</li>
+      <li>Puedes <b>borrar</b> tu mensaje en los primeros 10 minutos.</li>
+      <li>Los mensajes <b>Aviso del sistema</b> los escribe la app sola: cuando se publica un cuadro o un turno queda sin cobertura.</li>
+    </ul>
+
+    <h3>La pantalla de Ayuda</h3>
+    <figure>
+      <img src="img/08-ayuda.png" alt="Ayuda" />
+      <figcaption>La guía dentro de la app, con un botón «Abrir →» en cada pantalla.</figcaption>
+    </figure>
+
+    <!-- 4 -->
+    <h2>4. Guía para coordinadores/as</h2>
+    <p>El coordinador puede hacer todo lo anterior y, además, ve las pantallas <b>Editor de cuadro</b> y <b>Administración</b>.</p>
+    <figure>
+      <img src="img/09-inicio-coordinadora.png" alt="Página principal del coordinador" />
+      <figcaption>Página principal de la coordinadora: el número naranja indica una solicitud por aprobar.</figcaption>
+    </figure>
+
+    <h3>Crear al personal</h3>
+    <figure>
+      <img src="img/12-administracion.png" alt="Administración" />
+      <figcaption>Administración → Personal.</figcaption>
+    </figure>
+    <ol>
+      <li><b>Administración → Personal → + Nuevo usuario</b>.</li>
+      <li>Llena documento, nombres, rol, cargo, fecha de ingreso y salario.</li>
+      <li>La app muestra una <b>contraseña temporal</b>: entrégasela a la persona. Al entrar, deberá cambiarla.</li>
+    </ol>
+    <ul>
+      <li><b>Contraseña:</b> genera una nueva temporal si alguien la olvidó.</li>
+      <li><b>Desactivar:</b> la persona ya no puede entrar, pero se conserva su historial. Los usuarios nunca se borran.</li>
+    </ul>
+    <p>
+      En las otras pestañas ajustas los <b>tipos de turno</b> (código, horario y color), los <b>parámetros laborales</b> (cada cambio rige desde una fecha, así no
+      se alteran los meses anteriores), los <b>festivos</b> (ya vienen los de Colombia) y consultas la <b>auditoría</b>.
+    </p>
+
+    <h3>Armar y publicar el cuadro de turnos</h3>
+    <figure>
+      <img src="img/10-editor.png" alt="Editor de cuadro" />
+      <figcaption>Editor de cuadro: paleta de turnos, grilla por persona y día, cobertura y horas por semana.</figcaption>
+    </figure>
+    <ol>
+      <li><b>Editor de cuadro → Nuevo cuadro</b>. Elige el período (máximo dos meses). Empieza como <b>Borrador</b>: solo tú lo ves.</li>
+      <li>
+        Elige un turno en la <b>paleta</b> (M, T, N, D) y haz clic en las casillas, o <b>arrastra</b> para pintar varias. <b>Libre</b> borra. Atajos: la letra del
+        turno, o <kbd>Supr</kbd> para Libre.
+      </li>
+      <li>Se guarda solo. Revisa las <b>advertencias</b> (avisan pero no bloquean), la fila de <b>cobertura</b> y la columna <b>Σ</b> con las horas por semana.</li>
+      <li>Pulsa <b>Publicar cuadro</b>. Todo el equipo lo ve al instante y el chat lo anuncia.</li>
+      <li><b>Exportar a Excel</b> descarga el cuadro (una fila por persona, una columna por día).</li>
+    </ol>
+    <p>
+      <b>Cambiar un cuadro publicado:</b> pinta los cambios y escribe el <b>motivo</b> en la barra que aparece abajo. Se crea una <b>versión nueva</b>; en
+      <b>Historial</b> ves qué cambió, quién y por qué. Al terminar el período, pulsa <b>Cerrar período</b>.
+    </p>
+
+    <h3>Aprobar o rechazar solicitudes</h3>
+    <figure>
+      <img src="img/11-solicitudes-coordinadora.png" alt="Solicitudes del coordinador" />
+      <figcaption>La bandeja del coordinador muestra las solicitudes de todo el equipo.</figcaption>
+    </figure>
+    <ol>
+      <li>El número naranja en <b>Solicitudes</b> indica cuántas esperan tu respuesta.</li>
+      <li>En la <b>Bandeja</b>, pulsa <b>Aprobar</b> o <b>Rechazar</b>, con un comentario corto si quieres.</li>
+      <li>Antes de aprobar, la app vuelve a revisar que quien toma el turno esté apto. Al aprobar, el cuadro cambia solo.</li>
+      <li>Si apruebas un permiso o vacaciones, esos turnos quedan <b>requiriendo cobertura</b>: búscala en el <b>Filtro de aptos</b> y asígnala en el editor.</li>
+    </ol>
+
+    <h3>Corregir una marcación</h3>
+    <ol>
+      <li><b>Horas y recargos</b> → elige la persona y el mes.</li>
+      <li>En el detalle, pulsa <b>Corregir</b> en el turno.</li>
+      <li>Elige si corriges la <b>entrada</b> o la <b>salida</b>, la hora correcta y el <b>motivo</b>. La corrección queda en la auditoría.</li>
+    </ol>
+
+    <h3>Moderar el chat</h3>
+    <p>Pulsa <b>Ocultar</b> en cualquier mensaje que no corresponda. Deja de verse para todos y queda registrado en la auditoría.</p>
+
+    <!-- 5 -->
+    <h2>5. Qué significa cada estado</h2>
+    <h3>Turno del día (Página principal → Estado del turno actual)</h3>
+    <table>
+      <tr>
+        <th style="width: 32%">Estado</th>
+        <th>Significa</th>
+      </tr>
+      <tr>
+        <td><span class="estado gris">Programado</span></td>
+        <td>El turno aún no empieza.</td>
+      </tr>
+      <tr>
+        <td><span class="estado verde">En turno</span></td>
+        <td>La persona marcó su entrada.</td>
+      </tr>
+      <tr>
+        <td><span class="estado ambar">Retrasado</span></td>
+        <td>El turno empezó y no ha marcado (pasada la tolerancia de 10 minutos).</td>
+      </tr>
+      <tr>
+        <td><span class="estado rojo">Ausente</span></td>
+        <td>Pasó una hora sin marcar la entrada.</td>
+      </tr>
+      <tr>
+        <td><span class="estado ambar">Salida pendiente</span></td>
+        <td>El turno terminó y no marcó la salida.</td>
+      </tr>
+      <tr>
+        <td><span class="estado gris">Finalizado</span></td>
+        <td>Marcó entrada y salida.</td>
+      </tr>
+    </table>
+    <h3>Solicitudes</h3>
+    <table>
+      <tr>
+        <th style="width: 32%">Estado</th>
+        <th>Significa</th>
+      </tr>
+      <tr>
+        <td><span class="estado ambar">Pendiente de compañero</span></td>
+        <td>Espera que el compañero acepte.</td>
+      </tr>
+      <tr>
+        <td><span class="estado ambar">Pendiente de coordinador</span></td>
+        <td>Espera la aprobación del coordinador.</td>
+      </tr>
+      <tr>
+        <td><span class="estado verde">Aprobada y aplicada</span></td>
+        <td>Se aprobó y el cuadro ya cambió.</td>
+      </tr>
+      <tr>
+        <td><span class="estado rojo">Rechazada</span></td>
+        <td>No se aprobó (por el coordinador o por el compañero).</td>
+      </tr>
+      <tr>
+        <td><span class="estado gris">Cancelada</span></td>
+        <td>Quien la pidió la retiró.</td>
+      </tr>
+    </table>
+    <div class="dos">
+      <div>
+        <h3>Cuadro de turnos</h3>
+        <table>
+          <tr>
+            <th>Estado</th>
+            <th>Significa</th>
+          </tr>
+          <tr>
+            <td><span class="estado gris">Borrador</span></td>
+            <td>En preparación; solo lo ve el coordinador.</td>
+          </tr>
+          <tr>
+            <td><span class="estado verde">Publicado</span></td>
+            <td>Lo ve todo el equipo; los cambios crean versiones.</td>
+          </tr>
+          <tr>
+            <td><span class="estado gris">Cerrado</span></td>
+            <td>Período terminado; ya no admite cambios.</td>
+          </tr>
+        </table>
+      </div>
+      <div>
+        <h3>Filtro de aptos</h3>
+        <table>
+          <tr>
+            <th>Estado</th>
+            <th>Significa</th>
+          </tr>
+          <tr>
+            <td><span class="estado verde">Apto</span></td>
+            <td>Puede tomar el turno.</td>
+          </tr>
+          <tr>
+            <td><span class="estado ambar">Con advertencia</span></td>
+            <td>Puede, pero queda cerca del límite de horas.</td>
+          </tr>
+          <tr>
+            <td><span class="estado rojo">No apto</span></td>
+            <td>Rompería una regla: descanso, cruce, ausencia o exceso de horas.</td>
+          </tr>
+        </table>
+      </div>
+    </div>
+    <h3>Turnos en el cuadro</h3>
+    <table>
+      <tr>
+        <th style="width: 32%">Código</th>
+        <th>Horario</th>
+      </tr>
+      <tr>
+        <td><b>M</b> · Mañana</td>
+        <td>07:00 a 13:00</td>
+      </tr>
+      <tr>
+        <td><b>T</b> · Tarde</td>
+        <td>13:00 a 19:00</td>
+      </tr>
+      <tr>
+        <td><b>N</b> · Noche</td>
+        <td>19:00 a 07:00 del día siguiente</td>
+      </tr>
+      <tr>
+        <td><b>D</b> · Día largo</td>
+        <td>07:00 a 19:00</td>
+      </tr>
+    </table>
+    <p>Estos son los turnos de fábrica; el coordinador puede cambiarlos en Administración → Tipos de turno.</p>
+
+    <!-- 6 -->
+    <h2>6. Preguntas frecuentes</h2>
+    <h3>Olvidé marcar la entrada o la salida.</h3>
+    <p>Avísale al coordinador por el chat. Él la corrige en <b>Horas y recargos</b> indicando el motivo.</p>
+    <h3>Olvidé mi contraseña.</h3>
+    <p>El coordinador te genera una temporal en <b>Administración → Personal → Contraseña</b>. Al entrar te pedirá cambiarla.</p>
+    <h3>No me deja ceder mi turno.</h3>
+    <p>Tu compañero quedaría sin descanso, con demasiadas horas o con dos turnos ese día. Mira el <b>Filtro de aptos</b> para ver quién sí puede.</p>
+    <h3>Mi solicitud dice «Pendiente de compañero».</h3>
+    <p>Tu compañero debe aceptarla desde su <b>Bandeja</b>. Le aparece un aviso y un número en el menú.</p>
+    <h3>Un turno tiene el borde rojo punteado.</h3>
+    <p>Quedó libre por un permiso o vacaciones aprobados y necesita a alguien que lo cubra. El chat también lo avisa.</p>
+    <h3>En «Estado del turno actual» dice «Sin conexión».</h3>
+    <p>La app se reconecta sola y vuelve a cargar los datos. Si no vuelve, cierra TurnoCare y ábrela de nuevo.</p>
+    <h3>El saldo de vacaciones no coincide con lo que tengo.</h3>
+    <p>La app cuenta las vacaciones aprobadas dentro de TurnoCare. Las tomadas antes de usar la app no aparecen; coméntalo con el coordinador.</p>
+    <h3>¿Dónde se guardan los datos? ¿Cómo hago una copia?</h3>
+    <p>
+      En el mismo computador, en la carpeta <code>%APPDATA%\TurnoCare\datos</code> (escríbela en la barra del Explorador de archivos). Para hacer una copia de
+      seguridad, cierra la app y copia esa carpeta. Desinstalar la app <b>no</b> la borra.
+    </p>
+    <h3>¿Puedo abrir la app dos veces?</h3>
+    <p>No. Si ya está abierta, al pulsar el ícono otra vez se trae al frente la ventana que ya tenías.</p>
+    <h3>¿Cómo la desinstalo?</h3>
+    <p>Desde <b>Configuración → Aplicaciones → Aplicaciones instaladas → TurnoCare → Desinstalar</b>.</p>
+  </body>
+</html>

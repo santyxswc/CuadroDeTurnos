@@ -3,6 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "description": "SGT - Sistema de Gestión de Turnos de Enfermería (TurnoCare)",
+  "author": "Santiago Caicedo",
   "workspaces": [
     "packages/*",
     "apps/*"
@@ -10,6 +11,8 @@
   "scripts": {
     "iniciar": "node scripts/iniciar.mjs",
     "instalador": "npm run empaquetar -w @sgt/desktop",
+    "guia:pdf": "npm run build && node apps/desktop/scripts/empaquetar-api.mjs && electron scripts/guia/generar.cjs",
+    "docs": "doxygen Doxyfile",
     "build": "npm run build --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "typecheck": "npm run typecheck --workspaces --if-present",

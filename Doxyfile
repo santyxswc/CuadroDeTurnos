@@ -1,0 +1,69 @@
+# Documentación técnica de TurnoCare con Doxygen.
+# Generar:  npm run docs   (o: doxygen Doxyfile)  ->  docs/doxygen/html/index.html
+# Autor: Santiago Caicedo
+# Solo se listan las opciones que cambian; el resto usa los valores por defecto de Doxygen.
+
+#--- Proyecto ------------------------------------------------------------------
+PROJECT_NAME           = "TurnoCare"
+PROJECT_NUMBER         = 0.1.0
+PROJECT_BRIEF          = "Gestión de turnos de enfermería · Santiago Caicedo"
+PROJECT_LOGO           = docs/doxygen/logo.png
+OUTPUT_DIRECTORY       = docs/doxygen
+OUTPUT_LANGUAGE        = Spanish
+INPUT_ENCODING         = UTF-8
+
+#--- Qué se documenta ----------------------------------------------------------
+INPUT                  = docs/doxygen/inicio.md \
+                         docs/doxygen/arquitectura.md \
+                         docs/08_Como_funciona_el_instalador.md \
+                         docs/06_Guia_de_Usuario.md \
+                         docs/01_Plan_Tecnico_Equipo_Desarrollo_SGT.md \
+                         docs/02_Decisiones_Respuestas_Cliente.md \
+                         docs/03_Bitacora_Sprint0.md \
+                         docs/04_Bitacora_Sprint1.md \
+                         docs/05_Bitacora_Sprint2.md \
+                         docs/07_Bitacora_Sprint3_a_5.md \
+                         packages/rules-engine/src \
+                         packages/shared-types/src \
+                         apps/api/src \
+                         apps/desktop/src \
+                         apps/desktop/electron
+RECURSIVE              = YES
+FILE_PATTERNS          = *.ts *.tsx *.md
+EXCLUDE_PATTERNS       = *.test.ts */node_modules/* */dist/*
+# Doxygen no trae un analizador de TypeScript: se lee con el de JavaScript.
+EXTENSION_MAPPING      = ts=JavaScript tsx=JavaScript
+MARKDOWN_SUPPORT       = YES
+TOC_INCLUDE_HEADINGS   = 3
+IMAGE_PATH             = docs/guia/img
+
+#--- Extracción ----------------------------------------------------------------
+EXTRACT_ALL            = YES
+EXTRACT_PRIVATE        = NO
+EXTRACT_STATIC         = YES
+JAVADOC_AUTOBRIEF      = YES
+SOURCE_BROWSER         = YES
+STRIP_CODE_COMMENTS    = NO
+REFERENCED_BY_RELATION = YES
+REFERENCES_RELATION    = YES
+FULL_PATH_NAMES        = YES
+STRIP_FROM_PATH        = .
+WARN_IF_UNDOCUMENTED   = NO
+WARN_LOGFILE           = docs/doxygen/advertencias.log
+
+#--- Salida HTML ---------------------------------------------------------------
+GENERATE_HTML          = YES
+GENERATE_LATEX         = NO
+GENERATE_TREEVIEW      = YES
+DISABLE_INDEX          = NO
+FULL_SIDEBAR           = NO
+SEARCHENGINE           = YES
+HTML_COLORSTYLE        = LIGHT
+# Verde azulado, el color de la app.
+HTML_COLORSTYLE_HUE    = 183
+HTML_COLORSTYLE_SAT    = 120
+HTML_COLORSTYLE_GAMMA  = 90
+HTML_TIMESTAMP         = NO
+HTML_DYNAMIC_SECTIONS  = YES
+HAVE_DOT               = NO
+HTML_EXTRA_STYLESHEET  = docs/doxygen/estilo.css

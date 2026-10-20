@@ -206,7 +206,7 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .mensaje.mio { background: #e1f3f1; align-self: flex-end; max-width: 90%; }
 .mensaje.novedad { border-left: 4px solid var(--naranja); }
 .mensaje.sistema { background: #fff4e8; font-style: italic; }
-.mensaje header { font-size: 12px; color: var(--suave); display: flex; gap: 6px; }
+.mensaje header { font-size: 12px; color: var(--suave); display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 6px; }
 .chat form { display: flex; flex-direction: column; gap: 6px; margin-top: 10px; }
 .chat form .fila { align-items: center; }
 
@@ -262,7 +262,7 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .pila.compacta { gap: 6px; }
 
 /* Chat */
-.mensaje header .borrar { margin-left: auto; font-size: 12px; }
+.mensaje header .borrar { margin-left: auto; font-size: 12px; white-space: nowrap; }
 .chat .centrado { align-self: center; font-size: 12px; }
 .mensaje { white-space: pre-wrap; overflow-wrap: anywhere; }
 

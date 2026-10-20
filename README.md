@@ -2,6 +2,10 @@
 
 Aplicación de escritorio para que un equipo de enfermería maneje su cuadro de turnos, marcaciones de entrada y salida, horas diurnas/nocturnas, recargos, solicitudes, vacaciones, pacientes atendidos y chat del equipo.
 
+**Autor:** Santiago Caicedo · **Versión:** 0.1.0 · **Descarga:** [instalador para Windows](https://github.com/santyxswc/CuadroDeTurnos/releases/latest) · **Guía:** [PDF](docs/Guia_de_Usuario_TurnoCare.pdf)
+
+![Página principal de TurnoCare](docs/guia/img/02-inicio-enfermero.png)
+
 Entrega comprometida: **11 de noviembre de 2026**.
 
 ## Tecnologías
@@ -88,6 +92,9 @@ npm test
 
 ## Documentación
 
+- **[Guía de usuario en PDF](docs/Guia_de_Usuario_TurnoCare.pdf)**: manual con capturas para enfermeros y coordinadores. Se regenera con `npm run guia:pdf`.
+- **[Cómo funciona el instalador](docs/08_Como_funciona_el_instalador.md)**: qué hay dentro del `.exe`, cómo arranca y cómo se genera.
+- **Documentación técnica (Doxygen)**: `npm run docs` (requiere [Doxygen](https://www.doxygen.nl)) y abre `docs/doxygen/html/index.html`. Incluye la arquitectura, todas estas páginas y la referencia del código.
 - [Plan técnico](docs/01_Plan_Tecnico_Equipo_Desarrollo_SGT.md)
 - [Decisiones a partir de las respuestas del cliente](docs/02_Decisiones_Respuestas_Cliente.md)
 - [Bitácora del Sprint 0](docs/03_Bitacora_Sprint0.md)

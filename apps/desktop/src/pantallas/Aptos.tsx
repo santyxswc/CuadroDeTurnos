@@ -18,6 +18,14 @@ import { Chip, Estado, Tarjeta } from '../componentes/Ui';
 
 const GRUPOS = ['APTO', 'APTO_CON_ADVERTENCIA', 'NO_APTO'] as const;
 
+/** Un enfermero ve el motivo con los límites, pero sin las horas de su compañero. */
+const sinHoras = (m: string) =>
+  m
+    .replace(/^Descanso de .+ h (antes|después) del turno < (.+) h mínimo$/, 'Tendría menos de $2 h de descanso $1 del turno')
+    .replace(/^Quedaría con .+ h en la semana \(límite (.+) h\)$/, 'Superaría el límite de $1 h en la semana')
+    .replace(/^Generaría .+ h de exceso en la semana$/, 'Generaría horas de exceso en la semana')
+    .replace(/^Quedaría con .+ h, cerca del máximo de (.+) h$/, 'Quedaría cerca del máximo de $1 h en la semana');
+
 const intervalo = (fecha: string, t: Pick<TipoTurnoDto, 'horaInicio' | 'horaFin'>) => ({
   inicio: bog(`${fecha}T${t.horaInicio}`),
   fin: bog(`${t.horaFin <= t.horaInicio ? sumarDias(fecha, 1) : fecha}T${t.horaFin}`),
@@ -126,7 +134,7 @@ export function Aptos() {
                       {persona.nombres}
                       {r.motivos.length > 0 && (
                         <ul className="motivos">
-                          {(esCoordinador ? r.motivos : r.motivos.map((m) => m.replace(/\d+(,\d+)?(\.\d+)? h/g, '… h'))).map((m) => <li key={m}>{m}</li>)}
+                          {(esCoordinador ? r.motivos : r.motivos.map(sinHoras)).map((m) => <li key={m}>{m}</li>)}
                         </ul>
                       )}
                     </div>

@@ -16,3 +16,6 @@ dist-test/
 dist-api/
 # Instalador generado (se publica como Release en GitHub, no va en el repositorio)
 *.exe
+# Documentacion generada con Doxygen (npm run docs)
+docs/doxygen/html/
+docs/doxygen/advertencias.log

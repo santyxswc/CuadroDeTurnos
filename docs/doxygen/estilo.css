@@ -1,0 +1,15 @@
+/* Ajustes de la documentación Doxygen de TurnoCare (autor: Santiago Caicedo). */
+.contents img {
+  max-width: 100%;
+  height: auto;
+  border: 1px solid #dbe3e7;
+  border-radius: 8px;
+  box-shadow: 0 4px 14px rgba(15, 61, 69, 0.12);
+}
+#projectlogo img {
+  border: 0;
+  box-shadow: none;
+}
+.contents table.markdownTable {
+  margin: 12px 0;
+}
