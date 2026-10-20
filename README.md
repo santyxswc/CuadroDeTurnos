@@ -28,7 +28,7 @@ docs/             Plan técnico, decisiones, bitácora y documentos del cliente
 
 ## Instalar en cualquier computador (Windows)
 
-1. Ejecuta **TurnoCare-Instalador-0.1.0.exe**. No pregunta nada: se instala, deja un ícono **TurnoCare** en el escritorio y se abre sola.
+1. Descarga **TurnoCare-Instalador-0.1.0.exe** desde [Releases](https://github.com/santyxswc/CuadroDeTurnos/releases/latest) y ábrelo. No pregunta nada: se instala, deja un ícono **TurnoCare** en el escritorio y se abre sola.
 2. Entra con un usuario de ejemplo (en la pantalla de ingreso, **¿Primera vez?**).
 
 No necesita Node.js, internet ni base de datos: la app lleva su propio servidor y guarda los datos en `%APPDATA%\TurnoCare\datos`. Si Windows muestra "Windows protegió su PC", pulsa **Más información → Ejecutar de todas formas** (el instalador no está firmado).
