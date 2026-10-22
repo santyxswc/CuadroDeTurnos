@@ -10,6 +10,7 @@ import {
 } from '@sgt/shared-types';
 import { randomUUID } from 'node:crypto';
 import { AlmacenService } from '../almacen/almacen.service';
+import { Cola } from '../almacen/archivo-json';
 import type { AsignacionGuardada, MarcacionGuardada, UsuarioGuardado } from '../almacen/modelos';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { hoyBogota } from '../comun/fechas';
@@ -44,6 +45,8 @@ export interface Correccion {
 /** Marcación de entrada y salida con la hora del servidor (RF-ASI-01 a 04) e indicadores del turno (RF-MAIN-02). */
 @Injectable()
 export class MarcacionesService {
+  private readonly cola = new Cola();
+
   constructor(
     private readonly almacen: AlmacenService,
     private readonly auditoria: AuditoriaService,
@@ -78,7 +81,12 @@ export class MarcacionesService {
   }
 
   /** La persona marca entrada o salida; el servidor decide cuál según su última marcación. */
-  async marcar(usuario: UsuarioGuardado, equipo: string | null, ip: string | null, ahora = new Date()): Promise<MarcacionDto> {
+  marcar(usuario: UsuarioGuardado, equipo: string | null, ip: string | null, ahora = new Date()): Promise<MarcacionDto> {
+    // En orden, una a la vez: dos clics casi simultáneos no deben registrar dos entradas.
+    return this.cola.ejecutar(() => this.registrarMarcacion(usuario, equipo, ip, ahora));
+  }
+
+  private async registrarMarcacion(usuario: UsuarioGuardado, equipo: string | null, ip: string | null, ahora: Date): Promise<MarcacionDto> {
     const ultima = this.almacen.marcaciones
       .filtrar((m) => m.usuarioId === usuario.id && !m.corregida)
       .sort((a, b) => b.creadaEn.localeCompare(a.creadaEn))[0];

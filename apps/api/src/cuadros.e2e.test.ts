@@ -274,6 +274,11 @@ describe('API SGT · cuadro de turnos, tiempo real y marcaciones', () => {
       assert.equal((await llamar<MiTurnoDto>('GET', '/marcaciones/mi-turno', { token: beto.token })).cuerpo.siguiente, 'SALIDA');
     });
 
+    it('dos marcaciones simultáneas no registran dos entradas', async () => {
+      const [a, b] = await Promise.all([llamar('POST', '/marcaciones', { token: coord, cuerpo: {} }), llamar('POST', '/marcaciones', { token: coord, cuerpo: {} })]);
+      assert.deepEqual([a.estado, b.estado].sort(), [201, 409]);
+    });
+
     it('sin turno cercano la marcación queda "sin turno" para revisión', async () => {
       const r = await llamar<MarcacionDto>('POST', '/marcaciones', { token: ana.token, cuerpo: {} });
       assert.equal(r.cuerpo.tipo, 'ENTRADA');
@@ -370,6 +375,18 @@ describe('API SGT · cuadro de turnos, tiempo real y marcaciones', () => {
       assert.equal(r.cuerpo.estado, 'PENDIENTE_COORDINADOR');
       await llamar('POST', `/solicitudes/${r.cuerpo.id}/resolver`, { token: coord, cuerpo: { aprueba: true } });
       assert.equal((await turnoDe(beto.usuario.id, e))?.estado, 'LIBERADA');
+    });
+
+    it('un turno liberado se puede devolver a la misma persona y el cuadro advierte el permiso', async () => {
+      const r = await llamar<CuadroDto>('PUT', `/cuadros/${cuadro.id}/celdas`, {
+        token: coord,
+        cuerpo: { cambios: [{ usuarioId: beto.usuario.id, fecha: e, tipoTurnoId: tipo('T').id }], motivo: 'Beto sí puede venir' },
+      });
+      assert.equal(r.estado, 200);
+      const turno = r.cuerpo.asignaciones.find((a) => a.usuarioId === beto.usuario.id && a.fecha === e && a.estado === 'ACTIVA');
+      assert.equal(turno?.codigo, 'T');
+      const advertencia = r.cuerpo.advertencias.find((x) => x.asignacionId === turno!.id);
+      assert.ok(advertencia?.motivos.some((m) => /vacaciones o permiso/.test(m)));
     });
 
     it('vacaciones con poca anticipación se rechazan; una pendiente se puede cancelar', async () => {

@@ -5,7 +5,7 @@ import { appendFile, mkdir, readFile, rename, writeFile } from 'node:fs/promises
 import { dirname } from 'node:path';
 
 /** Serializa operaciones asíncronas: cada una empieza cuando termina la anterior. */
-class Cola {
+export class Cola {
   private ultima: Promise<unknown> = Promise.resolve();
 
   ejecutar<T>(tarea: () => Promise<T>): Promise<T> {

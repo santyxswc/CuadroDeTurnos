@@ -224,6 +224,8 @@ describe('API SGT · Sprint 1', () => {
       );
       assert.equal((await llamar('POST', '/parametros', { token: coord, cuerpo: { clave: 'recargo.dominical_pct', valor: 'mucho', vigenteDesde: '2027-02-01' } })).estado, 400);
       assert.equal((await llamar('POST', '/parametros', { token: coord, cuerpo: { clave: 'no.existe', valor: 1, vigenteDesde: '2027-02-01' } })).estado, 400);
+      // Con divisor 0 el valor de la hora sería infinito.
+      assert.equal((await llamar('POST', '/parametros', { token: coord, cuerpo: { clave: 'jornada.divisor_mensual_h', valor: 0, vigenteDesde: '2027-02-01' } })).estado, 400);
     });
 
     it('festivos: lista por año, agrega, elimina y precarga', async () => {

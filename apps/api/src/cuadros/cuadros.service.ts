@@ -17,7 +17,7 @@ import { AlmacenService } from '../almacen/almacen.service';
 import type { AsignacionGuardada, CuadroGuardado } from '../almacen/modelos';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { ChatService } from '../chat/chat.service';
-import { diaMes, diasEntre, esFechaValida, hoyBogota, intervaloTurno, lunesDe } from '../comun/fechas';
+import { aInstante, diaMes, diasEntre, esFechaValida, hoyBogota, intervaloTurno, lunesDe, sumarDias } from '../comun/fechas';
 import { ParametrosService } from '../parametros/parametros.service';
 import { EventosGateway } from '../tiempo-real/eventos.gateway';
 
@@ -136,7 +136,8 @@ export class CuadrosService {
       registro = [];
       for (const x of cambios) {
         const actual = c.asignaciones.find((a) => a.usuarioId === x.usuarioId && a.fecha === x.fecha && a.estado !== 'REEMPLAZADA');
-        if ((actual?.tipoTurnoId ?? null) === x.tipoTurnoId) continue;
+        // Un turno liberado cuenta como celda vacía: así se le puede volver a asignar a la misma persona.
+        if ((actual?.estado === 'ACTIVA' ? actual.tipoTurnoId : null) === x.tipoTurnoId) continue;
         if (actual) {
           // En un cuadro publicado nada se borra: la asignación anterior queda como reemplazada.
           if (publicado) actual.estado = 'REEMPLAZADA';
@@ -203,6 +204,8 @@ export class CuadrosService {
       const c = await this.almacen.cuadros.actualizar(id, (x) => {
         for (const a of x.asignaciones) {
           if (a.usuarioId !== usuarioId || a.estado !== 'ACTIVA' || a.fecha < desde || a.fecha > hasta) continue;
+          // Un turno que ya empezó no se libera: se trabajó (o se está trabajando) y sus marcaciones cuentan.
+          if (Date.parse(a.inicio) <= Date.now()) continue;
           a.estado = 'LIBERADA';
           registro.push({ usuarioId, fecha: a.fecha, antes: a.codigo, despues: null });
         }
@@ -299,6 +302,12 @@ export class CuadrosService {
    */
   private advertencias(c: CuadroGuardado): AdvertenciaAsignacionDto[] {
     const porPersona = this.activasPorPersona();
+    // Vacaciones y permisos aprobados: avisan si alguien quedó programado en esas fechas (también en borradores).
+    const ausencias = new Map<string, Intervalo[]>();
+    for (const x of this.almacen.solicitudes.filtrar((x) => x.estado === 'APLICADA' && !!x.desde && !!x.hasta)) {
+      const intervalo = { inicio: aInstante(x.desde!, '00:00'), fin: aInstante(sumarDias(x.hasta!, 1), '00:00') };
+      ausencias.set(x.solicitanteId, [...(ausencias.get(x.solicitanteId) ?? []), intervalo]);
+    }
     const r: AdvertenciaAsignacionDto[] = [];
     for (const a of c.asignaciones) {
       if (a.estado !== 'ACTIVA') continue;
@@ -307,7 +316,7 @@ export class CuadrosService {
         {
           activo: this.almacen.usuarios.obtener(a.usuarioId)?.activo ?? false,
           asignaciones: (porPersona.get(a.usuarioId) ?? []).filter((x) => x.id !== a.id),
-          ausencias: [],
+          ausencias: ausencias.get(a.usuarioId) ?? [],
         },
         intervalo(a),
         {

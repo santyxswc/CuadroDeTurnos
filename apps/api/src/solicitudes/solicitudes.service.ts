@@ -3,6 +3,7 @@ import { evaluarAptitud } from '@sgt/rules-engine';
 import { EventoTiempoReal, type AsignacionDto, type CambioCeldaDto, type NuevaSolicitudDto, type SolicitudDto } from '@sgt/shared-types';
 import { randomUUID } from 'node:crypto';
 import { AlmacenService } from '../almacen/almacen.service';
+import { Cola } from '../almacen/archivo-json';
 import type { AsignacionGuardada, SolicitudGuardada, UsuarioGuardado } from '../almacen/modelos';
 import { AuditoriaService } from '../auditoria/auditoria.service';
 import { aInstante, diasEntre, esFechaValida, hoyBogota, sumarDias } from '../comun/fechas';
@@ -19,6 +20,9 @@ const NOMBRE_TIPO = { INTERCAMBIO: 'intercambio', CESION: 'cesión', PERMISO: 'p
  */
 @Injectable()
 export class SolicitudesService {
+  /** Los cambios de estado van en orden: así no se cruzan, por ejemplo, una aprobación y una cancelación. */
+  private readonly cola = new Cola();
+
   constructor(
     private readonly almacen: AlmacenService,
     private readonly auditoria: AuditoriaService,
@@ -86,7 +90,11 @@ export class SolicitudesService {
   }
 
   /** RF-SOL-02: el compañero acepta o rechaza antes de que llegue al coordinador. */
-  async responder(id: string, acepta: boolean, usuario: UsuarioGuardado) {
+  responder(id: string, acepta: boolean, usuario: UsuarioGuardado) {
+    return this.cola.ejecutar(() => this.responderEnOrden(id, acepta, usuario));
+  }
+
+  private async responderEnOrden(id: string, acepta: boolean, usuario: UsuarioGuardado) {
     const s = this.existente(id);
     if (s.companeroId !== usuario.id) throw new ForbiddenException('Esta solicitud no está dirigida a ti.');
     if (s.estado !== 'PENDIENTE_COMPANERO') throw new BadRequestException('La solicitud ya no espera tu respuesta.');
@@ -95,7 +103,11 @@ export class SolicitudesService {
   }
 
   /** RF-SOL-04: el coordinador aprueba (y el cuadro se actualiza solo) o rechaza con comentario. */
-  async resolver(id: string, aprueba: boolean, respuesta: string | undefined, actor: UsuarioGuardado) {
+  resolver(id: string, aprueba: boolean, respuesta: string | undefined, actor: UsuarioGuardado) {
+    return this.cola.ejecutar(() => this.resolverEnOrden(id, aprueba, respuesta, actor));
+  }
+
+  private async resolverEnOrden(id: string, aprueba: boolean, respuesta: string | undefined, actor: UsuarioGuardado) {
     const s = this.existente(id);
     if (s.estado !== 'PENDIENTE_COORDINADOR') throw new BadRequestException('La solicitud no está pendiente de aprobación.');
     if (aprueba) {
@@ -106,7 +118,11 @@ export class SolicitudesService {
   }
 
   /** RF-SOL-05: quien la pidió puede cancelarla mientras no esté aprobada. */
-  async cancelar(id: string, usuario: UsuarioGuardado) {
+  cancelar(id: string, usuario: UsuarioGuardado) {
+    return this.cola.ejecutar(() => this.cancelarEnOrden(id, usuario));
+  }
+
+  private async cancelarEnOrden(id: string, usuario: UsuarioGuardado) {
     const s = this.existente(id);
     if (s.solicitanteId !== usuario.id) throw new ForbiddenException('Solo quien hizo la solicitud puede cancelarla.');
     if (!s.estado.startsWith('PENDIENTE')) throw new BadRequestException('Solo se pueden cancelar solicitudes pendientes.');

@@ -8,6 +8,14 @@ import { diaAnterior, hoyBogota } from '../comun/fechas';
 const aDto = ({ clave, valor, vigenteDesde, vigenteHasta }: ParametroGuardado): ParametroDto => ({ clave, valor, vigenteDesde, vigenteHasta });
 
 /** Parámetros laborales con vigencia (ADR-004, RF-ADM-01). */
+const MAYORES_QUE_CERO = new Set<string>([
+  'jornada.maxima_semanal_h',
+  'jornada.divisor_mensual_h',
+  'aptitud.max_horas_continuas',
+  'seguridad.inactividad_min',
+  'nomina.smmlv',
+]);
+
 @Injectable()
 export class ParametrosService {
   constructor(
@@ -49,7 +57,9 @@ export class ParametrosService {
     if (typeof valor !== typeof defecto) {
       throw new BadRequestException(`El valor de "${clave}" debe ser de tipo ${typeof defecto === 'number' ? 'número' : typeof defecto === 'boolean' ? 'sí/no' : 'texto'}.`);
     }
-    if (typeof valor === 'number' && valor < 0) throw new BadRequestException('El valor no puede ser negativo.');
+    if (typeof valor === 'number' && (!Number.isFinite(valor) || valor < 0)) throw new BadRequestException('El valor no puede ser negativo.');
+    // Con 0 en estos, el valor de la hora sería infinito o la sesión se cerraría al instante.
+    if (typeof valor === 'number' && valor === 0 && MAYORES_QUE_CERO.has(clave)) throw new BadRequestException(`El valor de "${clave}" debe ser mayor que 0.`);
     if (typeof defecto === 'string' && /^\d{2}:\d{2}$/.test(defecto) && !/^([01]\d|2[0-3]):[0-5]\d$/.test(String(valor))) {
       throw new BadRequestException('La hora debe tener el formato HH:mm.');
     }
