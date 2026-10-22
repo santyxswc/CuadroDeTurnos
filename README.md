@@ -101,4 +101,5 @@ npm test
 - [Bitácora del Sprint 1](docs/04_Bitacora_Sprint1.md): autenticación, administración y endpoints de la API
 - [Bitácora del Sprint 2](docs/05_Bitacora_Sprint2.md): cuadro de turnos con versiones, tiempo real (Socket.IO) y marcaciones
 - [Bitácora de los Sprints 3 a 5](docs/07_Bitacora_Sprint3_a_5.md): horas, pacientes, solicitudes, vacaciones, aptos, chat, avisos y exportación
+- [Bitácora del Sprint 6](docs/09_Bitacora_Sprint6.md): correcciones finales, pruebas y limitaciones conocidas
 - [Guía de usuario](docs/06_Guia_de_Usuario.md): cómo usar cada pantalla, para enfermeros y coordinadores

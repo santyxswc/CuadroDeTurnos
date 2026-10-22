@@ -23,6 +23,7 @@ INPUT                  = docs/doxygen/inicio.md \
                          docs/04_Bitacora_Sprint1.md \
                          docs/05_Bitacora_Sprint2.md \
                          docs/07_Bitacora_Sprint3_a_5.md \
+                         docs/09_Bitacora_Sprint6.md \
                          packages/rules-engine/src \
                          packages/shared-types/src \
                          apps/api/src \

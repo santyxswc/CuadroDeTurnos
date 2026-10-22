@@ -96,7 +96,7 @@ En **Solicitudes → Bandeja**, mientras esté pendiente, pulsa **Cancelar**.
 
 ### Revisar mis horas
 1. Abre **Horas y recargos** y elige el mes.
-2. **Calcular con**: *Turnos programados* (según el cuadro) u *Horas marcadas* (lo que marcaste, que es lo que cuenta para nómina).
+2. **Calcular con**: *Horas marcadas* (lo que marcaste, que es lo que cuenta para nómina; es la opción que aparece al abrir) o *Turnos programados* (según el cuadro).
 3. En el detalle ves cada turno, su desglose y a qué hora marcaste.
 4. **Exportar a Excel** descarga el detalle.
 

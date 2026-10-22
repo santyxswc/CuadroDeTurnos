@@ -30,7 +30,7 @@ TypeScript en todo el monorepo (npm workspaces):
 ## Documentación
 - `docs/01_Plan_Tecnico_Equipo_Desarrollo_SGT.md`: requisitos, reglas de negocio, ADRs, C4 y plan de sprints.
 - `docs/02_Decisiones_Respuestas_Cliente.md`: respuestas del cliente y los cambios de alcance que generaron (recargos en pesos, datos de pacientes).
-- `docs/03`, `04`, `05`, `07`: bitácoras de avance (Sprint 0, 1, 2 y 3 a 5). **Actualízalas al terminar cada paso.**
+- `docs/03`, `04`, `05`, `07`, `09`: bitácoras de avance (Sprint 0, 1, 2, 3 a 5 y 6). **Actualízalas al terminar cada paso.**
 - `docs/06_Guia_de_Usuario.md` (y su PDF), `docs/08_Como_funciona_el_instalador.md`.
 
 ## Forma de trabajo
