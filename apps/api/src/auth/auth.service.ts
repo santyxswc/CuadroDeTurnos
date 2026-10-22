@@ -15,6 +15,8 @@ import { cumplePolitica, hashPassword, MENSAJE_POLITICA, sha256, tokenAleatorio,
 const MAX_INTENTOS = 5;
 const MINUTOS_BLOQUEO = 5;
 const CREDENCIALES_INVALIDAS = 'Usuario o contraseña incorrectos.';
+/** Hash de relleno: si el usuario no existe se verifica contra este, para que tarde lo mismo. */
+const HASH_RELLENO = hashPassword(tokenAleatorio());
 
 @Injectable()
 export class AuthService {
@@ -40,7 +42,7 @@ export class AuthService {
 
     const usuario = this.almacen.usuarios.buscar((u) => u.documento.toLowerCase() === clave || u.email === clave);
     // Se verifica la contraseña aunque el usuario no exista o esté inactivo, para no revelar cuál falló.
-    const valida = usuario ? await verificarPassword(usuario.hashPassword, password) : false;
+    const valida = await verificarPassword(usuario?.hashPassword ?? (await HASH_RELLENO), password);
     if (!usuario || !valida || !usuario.activo) {
       const fallos = (intento?.fallos ?? 0) + 1;
       this.intentos.set(clave, { fallos, bloqueadoHasta: fallos >= MAX_INTENTOS ? Date.now() + MINUTOS_BLOQUEO * 60_000 : 0 });

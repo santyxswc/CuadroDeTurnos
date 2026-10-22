@@ -22,12 +22,14 @@ export class LoginDto {
 export class RefrescarDto {
   @IsString()
   @IsNotEmpty()
+  @MaxLength(200)
   tokenRefresco: string;
 }
 
 export class CambiarPasswordDto {
   @IsString()
   @IsNotEmpty({ message: 'Escribe tu contraseña actual.' })
+  @MaxLength(200)
   actual: string;
 
   @IsString()
