@@ -28,10 +28,13 @@ const duracionH = (a: AsignacionDto) => (Date.parse(a.fin) - Date.parse(a.inicio
 
 /** Recarga periódica: los estados del turno cambian con el paso del tiempo aunque nadie marque. */
 function useCadaMinuto(fn: () => void) {
+  // La función se guarda en un ref para que el intervalo no se reinicie en cada render.
+  const ultima = useRef(fn);
+  ultima.current = fn;
   useEffect(() => {
-    const t = window.setInterval(fn, 60_000);
+    const t = window.setInterval(() => ultima.current(), 60_000);
     return () => window.clearInterval(t);
-  });
+  }, []);
 }
 
 export function Inicio() {

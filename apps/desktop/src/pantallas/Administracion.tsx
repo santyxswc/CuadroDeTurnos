@@ -399,7 +399,7 @@ function Parametros() {
   const defecto = clave ? PARAMETROS_DEFECTO[clave as keyof typeof PARAMETROS_DEFECTO] : null;
   const guardar = async () => {
     if (!clave) return;
-    const convertido = typeof defecto === 'number' ? Number(valor) : typeof defecto === 'boolean' ? valor === 'true' : valor;
+    const convertido = typeof defecto === 'number' ? (valor.trim() ? Number(valor) : NaN) : typeof defecto === 'boolean' ? valor === 'true' : valor;
     const r = await accion.ejecutar(() => api('POST', '/parametros', { clave, valor: convertido, vigenteDesde: desde }));
     if (r) {
       setClave(null);

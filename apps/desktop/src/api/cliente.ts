@@ -65,16 +65,16 @@ async function enviar(metodo: string, ruta: string, cuerpo?: unknown): Promise<R
 
 /** Cambia el token de refresco por uno nuevo. Varias llamadas simultáneas comparten el mismo refresco. */
 export function refrescar(): Promise<void> {
+  // La limpieza va afuera de la función async: si fallara antes del primer await, un finally interno
+  // correría antes de guardar la promesa y quedaría guardado un refresco ya rechazado.
   refrescoEnCurso ??= (async () => {
-    try {
-      if (!tokens) throw new ErrorApi(401, 'Sin sesión');
-      const r = await enviar('POST', '/auth/refrescar', { tokenRefresco: tokens.refresco });
-      if (!r.ok) throw await leerError(r);
-      configurarSesion((await r.json()) as RespuestaLoginDto);
-    } finally {
-      refrescoEnCurso = null;
-    }
-  })();
+    if (!tokens) throw new ErrorApi(401, 'Sin sesión');
+    const r = await enviar('POST', '/auth/refrescar', { tokenRefresco: tokens.refresco });
+    if (!r.ok) throw await leerError(r);
+    configurarSesion((await r.json()) as RespuestaLoginDto);
+  })().finally(() => {
+    refrescoEnCurso = null;
+  });
   return refrescoEnCurso;
 }
 

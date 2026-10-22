@@ -24,6 +24,12 @@ function crearVentana() {
     },
   });
 
+  // La app no abre ventanas nuevas ni navega a otros sitios: solo muestra su propia interfaz.
+  ventana.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+  ventana.webContents.on('will-navigate', (evento, url) => {
+    if (!(urlDesarrollo ? url.startsWith(urlDesarrollo) : url.startsWith('file://'))) evento.preventDefault();
+  });
+
   if (urlDesarrollo) {
     void ventana.loadURL(urlDesarrollo);
   } else {

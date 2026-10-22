@@ -6,7 +6,7 @@ import { NOMBRE_CARGO, type AsignacionDto, type FestivoDto, type MarcacionDto, t
 import { api } from '../api/cliente';
 import { useAccion, useDatos } from '../api/useDatos';
 import { useSesion } from '../sesion';
-import { diaMes, fechaLocal, finDeMes, horaLocal, horas, pesos } from '../datos/fechas';
+import { diaMes, fechaLocal, finDeMes, horaLocal, horas, lunesDe, pesos, sumarDias } from '../datos/fechas';
 import { clasificar, filasHoras, parametro, porcentajes, type FilaHoras, type Fuente } from '../datos/liquidacion';
 import { descargarCsv } from '../datos/exportar';
 import { Chip, Dato, Tarjeta } from '../componentes/Ui';
@@ -29,14 +29,18 @@ export function MisHoras() {
   const esCoordinador = yo!.rol === 'COORDINADOR';
   const [usuarioId, setUsuarioId] = useState(yo!.id);
   const [mes, setMes] = useState(fechaLocal(new Date()).slice(0, 7));
-  const [fuente, setFuente] = useState<Fuente>('programadas');
+  const [fuente, setFuente] = useState<Fuente>('reales');
   const desde = `${mes}-01`;
   const hasta = finDeMes(desde);
+  // Las semanas que cruzan el inicio o el fin del mes se traen completas, para que el exceso semanal (RN-02)
+  // no se corte en el límite del mes. Las marcaciones, un día más: la salida de una noche cae al día siguiente.
+  const inicioSemanas = lunesDe(desde);
+  const finSemanas = sumarDias(lunesDe(hasta), 6);
 
   // El coordinador puede ver a cualquiera; un enfermero solo a sí mismo (con sus datos de la sesión).
   const equipo = useDatos<UsuarioDto[]>(esCoordinador ? '/usuarios' : null);
-  const turnos = useDatos<AsignacionDto[]>(`/cuadros/asignaciones?desde=${desde}&hasta=${hasta}`);
-  const marcaciones = useDatos<MarcacionDto[]>(`/marcaciones?desde=${desde}&hasta=${hasta}&usuarioId=${usuarioId}`);
+  const turnos = useDatos<AsignacionDto[]>(`/cuadros/asignaciones?desde=${inicioSemanas}&hasta=${finSemanas}`);
+  const marcaciones = useDatos<MarcacionDto[]>(`/marcaciones?desde=${inicioSemanas}&hasta=${sumarDias(finSemanas, 1)}&usuarioId=${usuarioId}`);
   const parametros = useDatos<ParametroDto[]>(`/parametros?fecha=${desde}`);
   const festivos = useDatos<FestivoDto[]>('/festivos');
   const tipos = useDatos<TipoTurnoDto[]>('/tipos-turno?incluirInactivos=true');
@@ -51,7 +55,7 @@ export function MisHoras() {
     fuente,
     ps,
     new Set((festivos.datos ?? []).map((f) => f.fecha)),
-  );
+  ).filter((x) => x.a.fecha >= desde && x.a.fecha <= hasta);
   const suma = (k: 'total' | 'diurnas' | 'nocturnas' | 'dominicalesDiurnas' | 'dominicalesNocturnas' | 'extra') => filas.reduce((s, f) => s + f[k], 0);
   const clasificadas = clasificar(filas);
   const salario = p?.salarios.filter((s) => s.vigenteDesde <= hasta).at(-1)?.salarioBase ?? 0;
@@ -65,7 +69,7 @@ export function MisHoras() {
   const [corrigiendo, setCorrigiendo] = useState<FilaHoras | null>(null);
 
   const exportar = () =>
-    descargarCsv(`horas-${(p?.nombres ?? 'persona').replace(/s+/g, '-')}-${mes}`, [
+    descargarCsv(`horas-${(p?.nombres ?? 'persona').replace(/\s+/g, '-')}-${mes}`, [
       ['Fecha', 'Turno', 'Inicio', 'Fin', 'Entrada marcada', 'Salida marcada', 'Diurnas', 'Nocturnas', 'Dom. diurnas', 'Dom. nocturnas', 'Extra'],
       ...filas.map((x) => {
         const e = marca(x.a.id, 'ENTRADA');
