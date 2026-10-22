@@ -8,13 +8,13 @@ TurnoCare / SGT: app de escritorio para gestionar turnos de enfermería de **un 
 ## Decisiones que no se deben revertir sin preguntar
 - **NO hay base de datos** (ni PostgreSQL, ni SQLite, ni Prisma, ni Docker). Toda la información, credenciales incluidas, se guarda en **archivos JSON** que **solo la API** lee y escribe. Ver ADR-010 y §8.3 de `docs/01_Plan_Tecnico_Equipo_Desarrollo_SGT.md` (estructura de la carpeta de datos y reglas: escritura atómica con `.tmp` + rename, cola de escrituras, caché en memoria, repositorios con interfaz).
 - Las apps de escritorio **nunca** acceden a los archivos directamente; todo pasa por la API.
-- Contraseñas siempre hasheadas (Argon2id). Documento, teléfono y diagnóstico de pacientes cifrados (AES-256-GCM) dentro de `pacientes.json`; la llave va en una variable de entorno, no en la carpeta de datos.
+- Contraseñas siempre hasheadas (Argon2id). De los pacientes solo se guarda la **cantidad atendida por turno**, nunca datos personales (reemplaza el cifrado AES-256-GCM que planteaba el plan original).
 - Las marcaciones usan la hora del servidor. Zona horaria `America/Bogota`.
 - Las horas oficiales para nómina son las **marcadas** (reales), no las programadas.
 
 ## Stack
 TypeScript en todo el monorepo (npm workspaces):
-- `apps/desktop`: Electron + React 19 + Vite. Login y Administración ya usan la API (`src/api/cliente.ts`, `src/sesion.tsx`); el resto de pantallas sigue con datos de ejemplo en memoria (`src/datos/mock.ts`) hasta su sprint.
+- `apps/desktop`: Electron + React 19 + Vite. Todas las pantallas usan la API (`src/api/cliente.ts`, `src/sesion.tsx`); ya no hay datos de ejemplo en memoria. `electron/main.ts` arranca la API empaquetada (`apps/api/src/servidor.ts`) en la app instalada.
 - `apps/api`: NestJS 11. Persistencia en `src/almacen/archivo-json.ts` (`ColeccionJson`, `RegistroJsonl`) a través de `AlmacenService`. Todas las rutas requieren sesión salvo `@Publico()`; roles con `@Roles('COORDINADOR')`. Toda acción sensible se registra con `AuditoriaService`.
 - `packages/rules-engine`: reglas laborales puras (horas diurnas/nocturnas/dominicales, recargos, estado del turno, aptitud). Pruebas con Vitest; cualquier cambio de reglas va con pruebas.
 - `packages/shared-types`: enums, DTOs y `PARAMETROS_DEFECTO`.
@@ -30,7 +30,8 @@ TypeScript en todo el monorepo (npm workspaces):
 ## Documentación
 - `docs/01_Plan_Tecnico_Equipo_Desarrollo_SGT.md`: requisitos, reglas de negocio, ADRs, C4 y plan de sprints.
 - `docs/02_Decisiones_Respuestas_Cliente.md`: respuestas del cliente y los cambios de alcance que generaron (recargos en pesos, datos de pacientes).
-- `docs/03_Bitacora_Sprint0.md`, `docs/04_Bitacora_Sprint1.md`: bitácoras de avance (una por sprint). **Actualízalas al terminar cada paso.**
+- `docs/03`, `04`, `05`, `07`: bitácoras de avance (Sprint 0, 1, 2 y 3 a 5). **Actualízalas al terminar cada paso.**
+- `docs/06_Guia_de_Usuario.md` (y su PDF), `docs/08_Como_funciona_el_instalador.md`.
 
 ## Forma de trabajo
 - Todo en español: código de dominio, textos de la interfaz, documentos y mensajes de commit (formato convencional: `feat(modulo): ...`).

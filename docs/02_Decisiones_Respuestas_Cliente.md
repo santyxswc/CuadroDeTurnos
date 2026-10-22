@@ -112,6 +112,8 @@ Se agrega el catálogo `CARGO`: Auxiliar de enfermería, Enfermero/a profesional
 
 ## 4. Registro de pacientes (respuesta 8) · ADR-009 ⚠️
 
+> **Actualización (Sprint 3):** este cambio de alcance **no se implementó**. Para simplificar y no manejar datos sensibles, TurnoCare guarda solo la **cantidad de pacientes atendidos por turno** (RF-PAC-01/02), sin nombre, documento, diagnóstico ni teléfono. Por eso RF-PAC-04/05 y RNF-13 a RNF-17 quedan fuera del producto. Ver `07_Bitacora_Sprint3_a_5.md`.
+
 ### 4.1 Cambio de alcance
 La propuesta enviada al cliente dice textualmente: *"Solo se guarda el número, nunca datos de los pacientes."* El cliente ahora pide **nombre, documento, diagnóstico, teléfono y estado de egreso**. El diagnóstico es un **dato sensible** (Ley 1581 de 2012, art. 5) y la información clínica tiene reserva legal (Ley 23 de 1981, Resolución 1995 de 1999). Esto no impide construirlo, pero obliga a lo siguiente:
 

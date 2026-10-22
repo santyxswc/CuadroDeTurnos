@@ -35,11 +35,19 @@ Son de especial interés los reportes sobre:
 
 - Inicio de sesión, sesiones y control de roles (coordinador / enfermero) en la API.
 - Almacenamiento de contraseñas (Argon2id).
-- Cifrado de datos de pacientes (AES-256-GCM) y manejo de la llave.
+- Datos del personal (documento, salario) y de las marcaciones guardados en la carpeta de datos.
 - Acceso a los archivos de datos sin pasar por la API.
+
+## Pacientes
+
+La app **no guarda datos personales de pacientes**: solo la cantidad de pacientes atendidos por turno (decisión del Sprint 3). Por eso no hay datos de pacientes que cifrar.
+
+## Usuarios de ejemplo
+
+El instalador crea 10 usuarios de ejemplo con la contraseña pública `Demo2026`, para que la app se pueda usar de inmediato. TurnoCare es un proyecto académico; si se usara con datos reales, habría que cambiar esas contraseñas desde *Administración*.
 
 ## Secretos
 
-- No incluyas la llave de cifrado, contraseñas ni archivos de la carpeta de datos en issues, PRs ni mensajes.
-- La llave de cifrado va en una variable de entorno, nunca en el repositorio ni en la carpeta de datos.
+- No incluyas el secreto de sesiones (`SGT_JWT_SECRET`), contraseñas ni archivos de la carpeta de datos en issues, PRs ni mensajes.
+- Los secretos van en variables de entorno (`apps/api/.env`, ignorado por git), nunca en el repositorio.
 - Si publicas una credencial por error, rótala de inmediato.
