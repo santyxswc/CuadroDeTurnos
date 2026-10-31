@@ -19,7 +19,7 @@ TurnoCare reemplaza el cuadro de turnos en papel o en hojas de cálculo. Aquí t
 
 | Paso | Qué hacer |
 |---|---|
-| 1 | Instala la app con **TurnoCare-Instalador-0.1.0.exe**: doble clic y listo, no pregunta nada. Se abre sola y deja un ícono **TurnoCare** en el escritorio y en el menú Inicio. Las siguientes veces ábrela desde ese ícono. |
+| 1 | Instala la app con **TurnoCare-Instalador-0.1.1.exe**: doble clic y listo, no pregunta nada. Se abre sola y deja un ícono **TurnoCare** en el escritorio y en el menú Inicio. Las siguientes veces ábrela desde ese ícono. |
 | 2 | Escribe tu **número de documento** y la **contraseña** que te dio el coordinador. |
 | 3 | La primera vez la app te pide **cambiar la contraseña** por una tuya: mínimo 8 caracteres, con letras y números. |
 | 4 | Muévete con el **menú de la izquierda**. Los **números naranjas** te avisan de lo que espera tu atención (solicitudes por responder, mensajes nuevos). |

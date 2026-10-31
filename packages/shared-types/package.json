@@ -1,6 +1,6 @@
 {
   "name": "@sgt/shared-types",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "private": true,
   "description": "Enums, DTOs y parámetros por defecto compartidos entre la API y la app de escritorio",
   "main": "dist/index.js",

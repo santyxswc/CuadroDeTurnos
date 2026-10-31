@@ -1,8 +1,8 @@
 # Cómo funciona el instalador (.exe) {#instalador}
 
-**Autor:** Santiago Caicedo · **Versión:** 0.1.0 · **Descarga:** [Releases de GitHub](https://github.com/santyxswc/CuadroDeTurnos/releases/latest)
+**Autor:** Santiago Caicedo · **Versión:** 0.1.1 · **Descarga:** [Releases de GitHub](https://github.com/santyxswc/CuadroDeTurnos/releases/latest)
 
-Este documento explica qué hay dentro de `TurnoCare-Instalador-0.1.0.exe`, qué pasa al ejecutarlo y cómo se genera. La idea central: **la app de escritorio lleva su propio servidor**. Por eso funciona en cualquier PC con Windows, sin instalar Node.js, sin base de datos y sin internet.
+Este documento explica qué hay dentro de `TurnoCare-Instalador-0.1.1.exe`, qué pasa al ejecutarlo y cómo se genera. La idea central: **la app de escritorio lleva su propio servidor**. Por eso funciona en cualquier PC con Windows, sin instalar Node.js, sin base de datos y sin internet.
 
 ## 1. Qué hace al ejecutarlo
 
