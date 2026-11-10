@@ -288,3 +288,121 @@ ul.limpia { list-style: none; margin: 0; padding: 0; }
 .preguntas details:first-child { border-top: 0; }
 .preguntas summary { cursor: pointer; font-weight: 600; }
 .preguntas p { margin: 6px 0 0; color: var(--suave); }
+
+/* Portada de presentación: lo primero que se ve al abrir la app. Usa los colores del logo. */
+.portada {
+  --marino: #022857;
+  --celeste: #0d8aea;
+  --celeste-suave: #e8f3fd;
+  --tinta: #0f2440;
+  --tinta-suave: #4a5d75;
+  position: fixed; inset: 0; display: flex; flex-direction: column;
+  background: #f7fbff; color: var(--tinta);
+}
+.portada-barra {
+  display: flex; align-items: center; gap: 24px; padding: 14px 40px; flex-shrink: 0;
+  background: rgba(247, 251, 255, .85); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(2, 40, 87, .07); z-index: 2;
+}
+.portada-marca { border: 0; background: none; padding: 0; font-size: 21px; font-weight: 700; letter-spacing: -0.02em; color: var(--marino); }
+.portada-marca b { color: var(--celeste); }
+.portada-barra nav { display: flex; gap: 4px; margin-left: auto; }
+.portada-barra nav button { border: 0; background: none; color: var(--tinta-suave); padding: 8px 14px; border-radius: 999px; font-weight: 500; }
+.portada-barra nav button:hover { color: var(--marino); background: rgba(13, 138, 234, .08); }
+.portada-barra nav button.activo { color: var(--marino); background: var(--celeste-suave); font-weight: 600; }
+.portada-ingresar { background: var(--marino); border-color: var(--marino); color: #fff; padding: 9px 22px; border-radius: 999px; font-weight: 600; }
+.portada-ingresar:hover { background: #033a7c; border-color: #033a7c; }
+
+.portada-diapositivas { flex: 1; overflow-y: auto; scroll-snap-type: y mandatory; scroll-behavior: smooth; scrollbar-width: none; }
+.portada-diapositivas::-webkit-scrollbar { display: none; }
+.diapo {
+  position: relative; min-height: 100%; scroll-snap-align: start; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: center; padding: 48px 96px;
+}
+/* Entrada escalonada de cada diapositiva la primera vez que se ve. */
+.diapo > *, .diapo-rejilla > * { opacity: 0; transform: translateY(18px); transition: opacity .7s ease-out, transform .7s cubic-bezier(.2, .8, .2, 1); }
+.diapo.visible > *, .diapo.visible .diapo-rejilla > * { opacity: 1; transform: none; }
+.diapo.visible .diapo-rejilla > :nth-child(2) { transition-delay: .15s; }
+.diapo-inicio.visible > :nth-child(3) { transition-delay: .12s; }
+.diapo-inicio.visible > :nth-child(4) { transition-delay: .24s; }
+.diapo-inicio.visible > :nth-child(5) { transition-delay: .36s; }
+.diapo > .halo { opacity: 1; transform: none; }
+
+/* 1 · Inicio */
+.diapo-inicio { align-items: center; text-align: center; gap: 0; background: radial-gradient(ellipse at 50% 38%, #fff 0%, #f7fbff 55%, #e9f3fd 100%); }
+.halo {
+  position: absolute; inset: 0; pointer-events: none;
+  background:
+    radial-gradient(circle at 12% 85%, rgba(13, 138, 234, .12), transparent 32%),
+    radial-gradient(circle at 90% 12%, rgba(2, 40, 87, .08), transparent 30%);
+}
+.portada-logo { width: min(440px, 46vw); height: auto; position: relative; filter: drop-shadow(0 12px 28px rgba(2, 40, 87, .10)); }
+.portada-etiqueta { position: relative; margin: 26px 0 6px; color: var(--tinta-suave); font-size: 13px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; }
+.portada-lema { position: relative; font-size: clamp(34px, 4.6vw, 56px); line-height: 1.05; letter-spacing: -0.03em; font-weight: 750; color: var(--marino); }
+.portada-lema em, .cierre em { font-style: normal; color: var(--celeste); }
+.portada-acciones { position: relative; display: flex; gap: 12px; margin-top: 34px; }
+.portada-boton {
+  display: inline-flex; align-items: center; gap: 8px; padding: 13px 26px; white-space: nowrap; border-radius: 999px; font-size: 15px; font-weight: 600;
+  background: var(--celeste); border: 1px solid var(--celeste); color: #fff; box-shadow: 0 8px 22px rgba(13, 138, 234, .28);
+}
+.portada-boton:hover { background: #0a76c9; border-color: #0a76c9; }
+.portada-boton.secundario { background: #fff; color: var(--marino); border-color: rgba(2, 40, 87, .14); box-shadow: none; }
+.portada-boton.secundario:hover { border-color: var(--celeste); }
+
+/* 2 y 3 · Misión y visión */
+.diapo-rejilla { display: grid; grid-template-columns: 1fr 1.1fr; gap: 64px; align-items: center; max-width: 1240px; width: 100%; margin: 0 auto; }
+.diapo-numero { display: block; font-size: 13px; font-weight: 700; letter-spacing: .14em; color: var(--celeste); margin-bottom: 6px; }
+.diapo h2 { font-size: 48px; letter-spacing: -0.035em; font-weight: 750; color: var(--marino); margin: 0 0 18px; }
+.diapo h2::after { content: ''; display: block; width: 56px; height: 4px; border-radius: 4px; background: var(--celeste); margin-top: 14px; }
+.diapo-destacado { font-size: 20px; line-height: 1.55; color: var(--tinta); margin: 0; letter-spacing: -0.005em; }
+.diapo-detalle > p { font-size: 15px; line-height: 1.7; color: var(--tinta-suave); margin: 0 0 22px; }
+.diapo-detalle > p.diapo-destacado { font-size: 20px; color: var(--tinta); margin-bottom: 16px; }
+
+.pilares { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.pilares li {
+  display: flex; gap: 12px; align-items: flex-start; background: #fff; border: 1px solid rgba(2, 40, 87, .08);
+  border-radius: 14px; padding: 14px; box-shadow: 0 2px 10px rgba(2, 40, 87, .04);
+}
+.pilares b { display: block; color: var(--marino); font-size: 14px; }
+.pilares small { color: var(--tinta-suave); font-size: 12.5px; }
+.pilar-icono { flex-shrink: 0; display: grid; place-items: center; width: 40px; height: 40px; border-radius: 11px; background: var(--celeste-suave); color: var(--celeste); }
+.pilares.en-linea { grid-template-columns: 1fr; gap: 8px; margin-top: 8px; }
+.pilares.en-linea li { align-items: center; padding: 10px 14px; background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .14); box-shadow: none; }
+
+.diapo-vision { background: linear-gradient(135deg, #022857 0%, #04366f 55%, #0b5fae 100%); color: #e6f0fb; }
+.diapo-vision h2, .diapo-vision .pilares b { color: #fff; }
+.diapo-vision .diapo-numero { color: #7cc4ff; }
+.diapo-vision h2::after { background: #7cc4ff; }
+.diapo-vision .diapo-destacado { color: #fff; }
+.diapo-vision .diapo-detalle > p { color: #c4d6ec; }
+.diapo-vision .pilar-icono { background: rgba(124, 196, 255, .16); color: #7cc4ff; }
+.anio {
+  font-size: 120px; line-height: .9; font-weight: 800; letter-spacing: -0.05em; margin: 0 0 18px;
+  color: transparent; -webkit-text-stroke: 1.5px rgba(124, 196, 255, .55);
+}
+.cierre { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding-top: 22px; border-top: 1px solid rgba(255, 255, 255, .14); }
+.cierre span { font-size: 22px; font-weight: 700; letter-spacing: -0.02em; color: #fff; }
+.cierre em { color: #7cc4ff; }
+.diapo-vision .portada-boton { background: #fff; border-color: #fff; color: var(--marino); box-shadow: 0 8px 22px rgba(0, 0, 0, .2); }
+.diapo-vision .portada-boton:hover { background: #e8f3fd; }
+
+/* Puntos de navegación a la derecha, como en una presentación. */
+.portada-puntos { position: fixed; right: 26px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 3; }
+.portada-puntos button { width: 10px; height: 10px; padding: 0; border-radius: 999px; border: 0; background: rgba(13, 138, 234, .3); transition: height .25s ease, background-color .25s ease; }
+.portada-puntos button.activo { height: 28px; background: var(--celeste); }
+.portada-puntos.oscuro button { background: rgba(255, 255, 255, .35); }
+.portada-puntos.oscuro button.activo { background: #fff; }
+
+@media (max-height: 760px) {
+  .diapo { padding: 32px 96px; }
+  .diapo h2 { font-size: 40px; margin-bottom: 12px; }
+  .diapo-destacado, .diapo-detalle > p.diapo-destacado { font-size: 18px; }
+  .diapo-detalle > p { font-size: 14px; margin-bottom: 16px; }
+  .anio { font-size: 96px; }
+  .pilares li { padding: 11px; }
+  .cierre span { font-size: 19px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .portada-diapositivas { scroll-behavior: auto; }
+  .diapo > *, .diapo-rejilla > * { opacity: 1; transform: none; }
+}
+@media (prefers-reduced-transparency: reduce) { .portada-barra { background: #f7fbff; backdrop-filter: none; } }

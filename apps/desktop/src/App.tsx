@@ -6,6 +6,7 @@ import { useTiempoReal } from './api/tiempoReal';
 import { ultimoLeido } from './api/chatLeido';
 import { CambiarPassword } from './pantallas/CambiarPassword';
 import { Login } from './pantallas/Login';
+import { Portada } from './pantallas/Portada';
 import { Inicio } from './pantallas/Inicio';
 import { EditorCuadro } from './pantallas/EditorCuadro';
 import { Solicitudes } from './pantallas/Solicitudes';
@@ -32,6 +33,9 @@ const MENU: { ruta: Ruta; texto: string; soloCoordinador?: boolean }[] = [
 
 export function App() {
   const sesion = useSesion();
+  // La portada sale una vez al abrir la app; al cerrar sesión se vuelve directo al ingreso.
+  const [portadaVista, setPortadaVista] = useState(false);
+  if (!sesion.usuario && !portadaVista) return <Portada alIngresar={() => setPortadaVista(true)} />;
   if (!sesion.usuario) return <Login />;
   if (sesion.usuario.debeCambiarPassword) return <CambiarPassword />;
   return <Aplicacion />;
