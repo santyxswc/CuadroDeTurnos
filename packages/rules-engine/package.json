@@ -1,6 +1,6 @@
 {
   "name": "@sgt/rules-engine",
-  "version": "0.1.1",
+  "version": "0.2.0",
   "private": true,
   "description": "Motor de reglas laborales: horas diurnas/nocturnas/dominicales y valor de recargos (TS puro, sin E/S)",
   "main": "dist/index.js",

@@ -1,8 +1,8 @@
 # Cómo funciona el instalador (.exe) {#instalador}
 
-**Autor:** Santiago Caicedo · **Versión:** 0.1.1 · **Descarga:** [Releases de GitHub](https://github.com/santyxswc/CuadroDeTurnos/releases/latest)
+**Autor:** Santiago Caicedo · **Versión:** 0.2.0 · **Descarga:** [Releases de GitHub](https://github.com/santyxswc/CuadroDeTurnos/releases/latest)
 
-Este documento explica qué hay dentro de `TurnoCare-Instalador-0.1.1.exe`, qué pasa al ejecutarlo y cómo se genera. La idea central: **la app de escritorio lleva su propio servidor**. Por eso funciona en cualquier PC con Windows, sin instalar Node.js, sin base de datos y sin internet.
+Este documento explica qué hay dentro de `TurnoCare-Instalador-0.2.0.exe`, qué pasa al ejecutarlo y cómo se genera. La idea central: **la app de escritorio lleva su propio servidor**. Por eso funciona en cualquier PC con Windows, sin instalar Node.js, sin base de datos y sin internet.
 
 ## 1. Qué hace al ejecutarlo
 
@@ -88,7 +88,7 @@ Configuración principal de electron-builder:
 2. `npm run instalador`.
 3. Crear el release y adjuntar el `.exe`:
    ```bash
-   gh release create v0.1.1 apps/desktop/release/TurnoCare-Instalador-0.1.1.exe --title "TurnoCare 0.1.1" --notes "Novedades…"
+   gh release create v0.2.0 apps/desktop/release/TurnoCare-Instalador-0.2.0.exe --title "TurnoCare 0.2.0" --notes "Novedades…"
    ```
 
 El `.exe` no se guarda en el repositorio (`*.exe` está en `.gitignore`): pesa más de los 100 MB que permite GitHub por archivo, así que se distribuye por **Releases**.
