@@ -49,6 +49,6 @@
 ## Pendiente (Sprint 6)
 
 - Prueba de uso con el equipo (UAT): recorrer la guía con un enfermero y con la coordinadora.
-- ~~Instalador de escritorio~~ hecho: `npm run instalador` genera **TurnoCare-Instalador-0.2.0.exe** (ver README). La app instalada arranca su propia API en un puerto libre y crea el equipo de ejemplo la primera vez.
+- ~~Instalador de escritorio~~ hecho: `npm run instalador` genera **TurnoCare-Instalador-0.2.1.exe** (ver README). La app instalada arranca su propia API en un puerto libre y crea el equipo de ejemplo la primera vez.
 - Carga de datos reales.
 - Opcionales del plan: mensajes directos, copiar el cuadro del mes anterior, tema oscuro.

@@ -1,6 +1,6 @@
 {
   "name": "@sgt/desktop",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "Aplicación de escritorio del SGT (Electron + React + TypeScript)",
   "main": "dist-electron/main.js",

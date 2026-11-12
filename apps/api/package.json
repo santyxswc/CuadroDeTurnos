@@ -1,6 +1,6 @@
 {
   "name": "@sgt/api",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "private": true,
   "description": "API de aplicación del SGT (NestJS). Persistencia en archivos JSON, sin base de datos",
   "main": "dist/main.js",
