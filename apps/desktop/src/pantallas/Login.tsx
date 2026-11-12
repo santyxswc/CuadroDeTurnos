@@ -7,7 +7,7 @@ const EJEMPLOS = [
   ['80234567', 'Enfermero: Andrés Rojas'],
 ];
 
-export function Login() {
+export function Login({ alVolver }: { alVolver: () => void }) {
   const { iniciar, aviso } = useSesion();
   const [usuario, setUsuario] = useState('');
   const [password, setPassword] = useState('');
@@ -32,6 +32,9 @@ export function Login() {
           }
         }}
       >
+        <button type="button" className="enlace volver" onClick={alVolver}>
+          ← Volver al inicio
+        </button>
         <div className="marca">
           Turno<b>Care</b>
         </div>

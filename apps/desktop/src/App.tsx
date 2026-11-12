@@ -33,10 +33,10 @@ const MENU: { ruta: Ruta; texto: string; soloCoordinador?: boolean }[] = [
 
 export function App() {
   const sesion = useSesion();
-  // La portada sale una vez al abrir la app; al cerrar sesión se vuelve directo al ingreso.
+  // La portada sale al abrir la app; desde el ingreso se puede volver a ella.
   const [portadaVista, setPortadaVista] = useState(false);
   if (!sesion.usuario && !portadaVista) return <Portada alIngresar={() => setPortadaVista(true)} />;
-  if (!sesion.usuario) return <Login />;
+  if (!sesion.usuario) return <Login alVolver={() => setPortadaVista(false)} />;
   if (sesion.usuario.debeCambiarPassword) return <CambiarPassword />;
   return <Aplicacion />;
 }
